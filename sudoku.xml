@@ -633,7 +633,7 @@ var GameStateViewModel = function() {
                      shape: 'cell',
                      row: data.i,
                      col: data.j};
-      sendMessage('message', JSON.stringify(message));
+      sendMessage(message);
     });
 
     /*
@@ -996,11 +996,11 @@ var GameEditorViewModel = function(cells) {
   };
 };
 var onStateChanged = function(stateChangeEvent) {
-  console.log("message received", stateChangeEvent);
   for (var i=0; i<stateChangeEvent.addedKeys.length; ++i) {
     var entry = stateChangeEvent.addedKeys[i];
     if (entry.key == myid) continue;
-    var msg = entry.value;
+    var msg = JSON.parse(entry.value);
+    console.log(msg);
     switch (msg.command) {
     case 'new-game':
       gameStateViewModel.play(msg.gameString);
