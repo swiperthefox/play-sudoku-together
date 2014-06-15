@@ -288,6 +288,7 @@ var hangoutData = gapi.hangout.data;
 var myid = '';
 gapi.hangout.onApiReady.add(function(eventObj) {
   myid = gapi.hangout.getLocalParticipantId();
+  console.log(myid);
 });
 
 function sendMessage(msg) {
