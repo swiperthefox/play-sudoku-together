@@ -763,10 +763,10 @@ var GameStateViewModel = function() {
           self.highlightRow(shape.row);
           break;
         case 'col':
-          self..highlightCol(shape.col);
+          self.highlightCol(shape.col);
           break;
         case 'square':
-          self..highlightSquare(shape.row, shape.col);
+          self.highlightSquare(shape.row, shape.col);
           break;
         default:
           break;
