@@ -996,6 +996,7 @@ var GameEditorViewModel = function(cells) {
   };
 };
 var onStateChanged = function(stateChangeEvent) {
+  console.log("message received", stateChangeEvent);
   for (var i=0; i<stateChangeEvent.addedKeys.length; ++i) {
     var entry = stateChangeEvent.addedKeys[i];
     if (entry.key == myid) continue;
