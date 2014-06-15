@@ -816,8 +816,8 @@ var GameStateViewModel = function() {
 
   self.changeModeByName = function(name) {
     for (var i=0; i<self.registerNewGameMethod.length; ++i) {
-      if (self.registerNewGameMethod[i].name == name) {
-        self.getNewGame(self.registerNewGameMethod[i]);
+      if (self.newGameMethods[i].name == name) {
+        self.getNewGame(self.newGameMethods[i]);
         return;
       }
     }
