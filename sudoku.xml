@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="Your App Name">
+  <ModulePrefs title="Sudoku">
     <Require feature="rpc"/>
     <Require feature="views"/>
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
-
+        <script src="//plus.google.com/hangouts/_/api/dev/hangout.js"></script>
       <!-- Your application code -->
       <!DOCTYPE html>
     <head>
@@ -20,7 +20,7 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-        <script src="//plus.google.com/hangouts/_/api/dev/hangout.js"></script>
+
         
         <!-- <\!-- Optional theme -\-> -->
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
@@ -30,7 +30,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
         <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
         <!-- <link rel="stylesheet" href="bootstrap.min.css"> -->
         <!-- <link rel="stylesheet" href="bootstrap-theme.min.css"> -->
