@@ -436,6 +436,7 @@ var GameStateViewModel = function() {
   var self = this;
   self.done = ko.observable(false);
   self.gameString = ko.observable("");
+  self.currentCell = undefined;
 
   // 81 CellState objects in 9x9 array
   self.cells = (function() {
@@ -823,7 +824,7 @@ var GameStateViewModel = function() {
     }
   };
   self.setCurrentCell = function(row, col) {
-    self.currentCell.current(false);
+    if (self.currentCell) self.currentCell.current(false);
     self.cells[row][col].current(true);
     self.currentCell = self.cells[row][col];
   };
