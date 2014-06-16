@@ -823,9 +823,26 @@ var GameStateViewModel = function() {
     }
   };
   self.setCurrentCell = function(row, col) {
-    self.currentCell().current(false);
+    self.currentCell.current(false);
     self.cells[row][col].current(true);
-    self.currentCell(self.cells[row][col]);
+    self.currentCell = self.cells[row][col];
+  };
+  self.highlight = function(msg) {
+    switch (msg.shape) {
+    case 'row':
+      self.highlightRow(msg.row);
+      break;
+    case 'col':
+      self.highlightCol(msg.col);
+      break;
+    case 'square':
+      self.highlightSquare(msg.row, msg.col);
+      break;
+    case 'cell':
+      self.selectCell(msg.row, msg.col);
+      break;
+    default:
+    }
   };
 };
 
@@ -1006,7 +1023,7 @@ var onStateChanged = function(stateChangeEvent) {
       gameStateViewModel.play(msg.gameString);
       break;
     case 'highlight':
-      gameStateViewModel.highlightSquare(msg.row, msg.col);
+      gameStateViewModel.highlight(msg);
       break;
     case 'addValue':
       gameStateViewModel.addValue(msg.row, msg.col, msg.value);
@@ -1022,6 +1039,9 @@ var onStateChanged = function(stateChangeEvent) {
       break;
     case 'cell-edit':
       gameStateViewModel.gameEditorViewModel.setCell(msg.row, msg.col, msg.value);
+      break;
+    case 'reset':
+      gameStateViewModel.reset();
       break;
     default:
     }
