@@ -787,7 +787,7 @@ var PuzzleListViewModel = function (board) {
   self.updateBoard = function(newValue) {
     self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ""});
     if (self.notify) {
-      HANGOUTAPI.submitDelta({mode: 'List', puzzleID: self.puzzleID()});
+      HANGOUTAPI.submitDelta({mode: 'List', puzzleID: ''+self.puzzleID()});
     }
   };
 
@@ -1195,9 +1195,9 @@ if (window.gapi && gapi.hangout) {
       case 'gameString':
         sudoku.setNewGame(item.value);
         break;
-      case 'puzzleID':
-        self.puzzleChooser.setPuzzleId(item.value);
-        break;
+      // case 'puzzleID':
+      //   self.puzzleChooser.setPuzzleId(item.value);
+      //   break;
       default:
         if (item.key[0] != 'c') break;
         var row = parseInt(key[1]);
