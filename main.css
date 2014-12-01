@@ -1,0 +1,201 @@
+* {
+    outline: none;
+}
+body {
+    text-align: center;
+}
+/* first level children */
+#template-container {
+    width: 450px;
+    margin: auto auto;
+    position: relative;
+}
+table#game-pane {
+    border-collapse:collapse;
+    margin: auto auto;
+    display: inline-block;
+}
+
+div#controls {
+    display: inline-block;
+    position: absolute;
+    top: 22px;
+    bottom: 22px;
+    margin-left: 5px;
+    vertical-align: text-bottom;
+    min-width: 120px;
+    max-width: 140px;
+    background: linear-gradient(to right, #CBD0CB, rgba(105, 162, 80, 0.91));
+    padding: 5px;
+}
+
+/* In the grid */
+.cell {
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+    vertical-align: text-top;
+    border: 1px solid #202020;
+    margin: -1.5px -1px -1.5px -1px;
+    bottom: 0px;
+    position: relative;
+    outline: none;
+}
+.top-cell {
+    display: inline-block;
+    width: 39px;
+    height: 20px;
+    vertical-align: text-top;
+    outline: none;
+}
+.corner-cell {
+    width: 20px;
+    height: 20px;
+
+    outline: none;
+    text-align: center;
+}
+.side-cell {
+    width: 20px;
+    height: 40px;
+    font-size: 130%;
+    bottom: 0px;
+    position: relative;
+
+    outline: none;
+    vertical-align: middle;
+}
+
+.side-cell span, .top-cell span {
+    height: 16px !important;
+    margin: auto auto;
+}
+/* For the bold borders */
+.cell.cell-top-border {
+    border-top:3px solid #193D0C;
+    margin-top:-3px;
+}
+.cell.cell-bottom-border {
+    border-bottom:3px solid #193D0C;
+    margin-bottom:-3px;
+}
+.cell.cell-left-border {
+    border-left:3px solid #193D0C;
+    margin-left:-3px;
+}
+.cell.cell-right-border {
+    border-right:3px solid #193D0C;
+    margin-right:-3px;
+}
+
+/* text in the cell, as marker */
+.cell span {
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    display: block;
+    position: absolute;
+    padding: 2px 0px 0px 6px;
+    font-size: 12px;
+    line-height: 12px;
+    text-align: left;
+    background-color: white;
+}
+
+/* or as final answer */
+.cell span.centered {
+    padding: 3px 3px;
+    font-size: 30px;
+    text-align: center;
+    line-height: 30px;
+    vertical-align: text-bottom;
+}
+
+/* Highlighting cells  */
+.green {
+    background-color: #a4e8a0;
+}
+
+/* tweak */
+td:active {
+    outline: none;
+}
+
+/* in controls */
+#controls div {
+    width: 100%;
+}
+#digit-buttons {
+    bottom: 5px;
+    margin: 10px auto 0px auto;
+}
+
+button.digit-button {
+    width: 40px;
+    height: 40px;
+    margin: 1px;
+    outline: none;
+}
+button.menu {
+    width: 90px;
+}
+textarea {
+    font-family: monospace;
+    resize: none;
+    width: 100%;
+}
+#play-control {
+    height: 100%;
+}
+.btn-group {
+    position: absolute;
+    bottom: 2px;
+    left: 0px;
+    width: 100%;
+}
+.btn {
+    margin: 5px 0px;
+}
+.small-menu {
+    min-width: 100% !important;
+}
+.form-group label {
+    width: 100%;
+    text-align: left;
+}
+.open .dropdown-menu {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+    opacity:1;
+}
+
+.dropdown-menu {
+    opacity:.3;
+    -webkit-transform-origin: bottom;
+    transform-origin: bottom;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+    -webkit-transform: scale(1, 0);
+    display: block;
+    transition: all 0.2s linear;
+    -webkit-transition: all 0.2s linear;
+}
+.cell span.conflicted {
+    color: red;
+}
+.cell span.other-current-cell {
+    background-color: yellow;
+}
+
+#user-list {
+    margin: 15px 0px;
+}
+#user-list div.user-mark {
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+    border: 1px solid black;
+    margin: 2px 6px;
+    vertical-align: middle;
+}
