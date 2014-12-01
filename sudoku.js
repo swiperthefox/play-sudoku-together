@@ -1116,7 +1116,7 @@ if (window.gapi && gapi.hangout) {
         console.log(opt_updates);
       },
       sendMessage: function(message) {
-        hangout.data.sendMessage(message);
+        hangout.data.sendMessage(JSON.stringify(message));
         console.log(message);
       }
     };
