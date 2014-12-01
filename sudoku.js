@@ -1109,7 +1109,7 @@ if (window.gapi && gapi.hangout) {
     window.HANGOUTAPI = {
       clearValue: function(key){},
       setValue: function(key, value) {
-        hangout.data.setValue(key, value);
+        hangout.data.setValue(key, JSON.stringify(value));
       },
       submitDelta: function(opt_updates, opt_removes) {
         hangout.data.submitDelta(opt_updates, opt_removes);
