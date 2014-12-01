@@ -94,6 +94,10 @@ var UserList = function() {
   self.toggleState = function(uid) {
     self.userMap[uid].toggleState();
   };
+
+  self.enabled = function(uid) {
+    return self.userMap[uid].enabled();
+  };
 };
 
 /*
@@ -1126,7 +1130,7 @@ if (window.gapi && gapi.hangout) {
     sudoku.users.localUser = hangout.getLocalParticipantId();
     sudoku.users.addUsers(hangout.getParticipants());
 
-    var state = hangout.getState();
+    var state = hangout.data.getState();
     sudoku.catchUp(state);
   });
 
