@@ -1132,7 +1132,9 @@ if (window.gapi && gapi.hangout) {
     sudoku.users.addUsers(hangout.getParticipants());
 
     var state = hangout.data.getState();
-    sudoku.catchUp(state);
+    if (state.mode) {
+      sudoku.catchUp(state);
+    }
   });
 
   hangout.onParticipantsEnabled.add(function(event) {
