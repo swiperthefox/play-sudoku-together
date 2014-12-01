@@ -43,7 +43,7 @@
     <!-- <script src="knockout-3.1.0.js"></script> -->
     <!-- <link rel="stylesheet" href="stylesheet/normalize.css"> -->
     <!-- <script src="js/vendor/modernizr.js"></script> -->
-    <link href="main.css" rel="stylesheet">
+    <link href="https://play-sudoku-together.googlecode.com/git/main.css" rel="stylesheet">
   </head>
   <body onselectstart="return false;">
     <!-- Add your site or application content here -->
@@ -185,7 +185,7 @@
     </div>
     <!-- <script src="static/js/libs/hangup_client.js"></script>             -->
     <!-- <script src="main.js"></script> -->
-    <script src="sudoku.js"></script>
+    <script src="https://play-sudoku-together.googlecode.com/git/sudoku.js"></script>
   </body>
 </html>
 
