@@ -546,7 +546,7 @@ var BoardViewModel = function(row, col) {
   self.getSnapshot = function() {
     var result = {gameString: self.initGameString};
     self.forAllCells(function(i, j, cell) {
-      result['c'+i+'#'+j] = cell.values().slice(0);
+      result['c'+i+'#'+j] = JSON.stringify(cell.values().slice(0));
     });
     return result;
   };
@@ -1013,6 +1013,7 @@ var SudokuGameViewModel = function() {
    * set the game board, according to the shared state
    */
   self.catchUp = function(state) {
+    console.log(state);
     self.switchToMode(self.modes[state.mode], state, false);
   };
 
