@@ -1178,36 +1178,36 @@ if (window.gapi && gapi.hangout) {
    */
   hangout.data.onStateChanged.add(function(event) {
     console.log(event);
-    var changedKeys = event.addedKeys;
-    var mode = event.state['mode'];
+    // var changedKeys = event.addedKeys;
+    // var mode = event.state['mode'];
 
-    for (var i=0; i<changedKeys.length; ++i) {
-      var item = changedKeys[i];
-      var key = item.key;
-      switch(item.key) {
-      case 'mode':
-        if (item.value == 'play') {
-          sudoku.toPlayMode();
-        } else {
-          sudoku.changeModeByName(item.value);
-        }
-        break;
-      case 'gameString':
-        sudoku.setNewGame(item.value);
-        break;
-      // case 'puzzleID':
-      //   self.puzzleChooser.setPuzzleId(item.value);
-      //   break;
-      default:
-        if (item.key[0] != 'c') break;
-        var row = parseInt(key[1]);
-        var col = parseInt(key[3]);
-        var cell = sudoku.board.cells[row][col];
-        cell.setValue(JSON.parse(item.value));
-        if (mode == 'edit') {
-          cell.isGiven(item.value.length == 1);
-        };
-      }
-    }
+    // for (var i=0; i<changedKeys.length; ++i) {
+    //   var item = changedKeys[i];
+    //   var key = item.key;
+    //   switch(item.key) {
+    //   case 'mode':
+    //     if (item.value == 'play') {
+    //       sudoku.toPlayMode();
+    //     } else {
+    //       sudoku.changeModeByName(item.value);
+    //     }
+    //     break;
+    //   case 'gameString':
+    //     sudoku.setNewGame(item.value);
+    //     break;
+    //   // case 'puzzleID':
+    //   //   self.puzzleChooser.setPuzzleId(item.value);
+    //   //   break;
+    //   default:
+    //     if (item.key[0] != 'c') break;
+    //     var row = parseInt(key[1]);
+    //     var col = parseInt(key[3]);
+    //     var cell = sudoku.board.cells[row][col];
+    //     cell.setValue(JSON.parse(item.value));
+    //     if (mode == 'edit') {
+    //       cell.isGiven(item.value.length == 1);
+    //     };
+    //   }
+    // }
   });
 }
