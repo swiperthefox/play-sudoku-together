@@ -39,13 +39,13 @@ window.HANGOUTAPI = {
  * name: will be shown in team member list
  * state: bool value, decides if the user's highlight will be shown
  */
-var User = function(id, name, state) {
+var User = function(id, name, follow) {
   var self = this;
   self.name = name;
   self.id = id;
-  self.state = ko.observable(state);
+  self.follow = ko.observable(state);
   self.toggleState = function() {
-    self.state(!self.state());
+    self.follow(!self.follow());
   };
 };
 
@@ -95,7 +95,7 @@ var UserList = function() {
   };
 
   self.enabled = function(uid) {
-    return self.userMap[uid].enabled();
+    return self.userMap[uid].follow();
   };
 };
 
