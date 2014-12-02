@@ -1159,7 +1159,7 @@ if (window.gapi && gapi.hangout) {
         !sudoku.users.enabled(sender))
       return;
     var message = JSON.parse(event.message);
-    sudoku.board..highlightUnit(message, false);
+    sudoku.board.highlightUnit(message, false);
   });
 
   /*
