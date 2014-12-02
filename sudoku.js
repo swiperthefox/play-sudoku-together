@@ -337,7 +337,8 @@ var BoardViewModel = function(row, col) {
     gameState = gameState || {};
     self.forAllCells(function(i, j, cell) {
       var initValue = gameString[i*self.row+j];
-      var currentState = JSON.parse(gameState['c'+i+'#'+j]);
+      var cellState = gameState[cell.key];
+      var currentState = cellState?JSON.parse(cellState):[];
       cell.init(initValue, currentState);
     });
   };
