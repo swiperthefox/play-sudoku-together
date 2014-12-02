@@ -60,7 +60,6 @@ var UserList = function() {
 
   self.addUser = function(id, name) {
     if (id != self.localUser && !self.userMap[id]) {
-      console.log("added new user:", id, ",", name);
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
@@ -70,7 +69,7 @@ var UserList = function() {
   self.addUsers = function(ulist) {
     for (var i=0; i<ulist.length; ++i) {
       var user = ulist[i];
-      self.addUser(user.id, user.person.name);
+      self.addUser(user.id, user.person.displayName);
     }
   };
 
@@ -176,7 +175,7 @@ var CellState = function(i, j) {
 
   self.setValue = function(values) {
     self.values.removeAll();
-    self.values.push.apply(self.values, values);
+    self.values.push.apply(self.values, JSON.parse(values));
   };
   /*
    * Set the state of cell
