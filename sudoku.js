@@ -1138,9 +1138,7 @@ if (window.gapi && gapi.hangout) {
 
   hangout.onParticipantsEnabled.add(function(event) {
     var newUsers = event.enabledParticipants;
-    for (var i=0; i<newUsers.length; ++i) {
-      sudoku.users.addUser(newUsers);
-    }
+    sudoku.users.addUsers(newUsers);
   });
   hangout.onParticipantsDisabled.add(function(event) {
     var leaved = event.disabledParticipants;
