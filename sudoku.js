@@ -58,10 +58,8 @@ var UserList = function() {
   self.userMap = Object.create(null);
   self.localUser = undefined;
 
-  self.addUser = function(user) {
-    var id = user.id;
-    var name = user.name;
-    if (id != self.localUser) {
+  self.addUser = function(id, name) {
+    if (id != self.localUser && !self.userMap[id]) {
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
@@ -70,7 +68,8 @@ var UserList = function() {
 
   self.addUsers = function(ulist) {
     for (var i=0; i<ulist.length; ++i) {
-      self.addUser(ulist[i]);
+      var user = ulist[i];
+      self.addUser(user.id, user.person.name);
     }
   };
 
@@ -1139,7 +1138,9 @@ if (window.gapi && gapi.hangout) {
 
   hangout.onParticipantsEnabled.add(function(event) {
     var newUsers = event.enabledParticipants;
-    sudoku.users.addUsers(newUsers);
+    for (var i=0; i<newUsers.length; ++i) {
+      sudoku.users.addUser(newUsers);
+    }
   });
   hangout.onParticipantsDisabled.add(function(event) {
     var leaved = event.disabledParticipants;
