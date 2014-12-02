@@ -43,7 +43,7 @@ var User = function(id, name, follow) {
   var self = this;
   self.name = name;
   self.id = id;
-  self.follow = ko.observable(state);
+  self.follow = ko.observable(follow);
   self.toggleState = function() {
     self.follow(!self.follow());
   };
