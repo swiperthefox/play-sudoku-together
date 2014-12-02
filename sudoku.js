@@ -175,7 +175,7 @@ var CellState = function(i, j) {
 
   self.setValue = function(values) {
     self.values.removeAll();
-    self.values.push.apply(self.values, JSON.parse(values));
+    self.values.push.apply(self.values, values);
   };
   /*
    * Set the state of cell
@@ -337,7 +337,7 @@ var BoardViewModel = function(row, col) {
     gameState = gameState || {};
     self.forAllCells(function(i, j, cell) {
       var initValue = gameString[i*self.row+j];
-      var currentState = gameState['c'+i+'#'+j];
+      var currentState = JSON.parse(gameState['c'+i+'#'+j]);
       cell.init(initValue, currentState);
     });
   };
