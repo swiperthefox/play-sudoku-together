@@ -56,10 +56,10 @@ var UserList = function() {
   var self = this;
   self.userList = ko.observableArray();
   self.userMap = Object.create(null);
-  self.localUser = undefined;
+  self.localUser = ko.observable("");
 
   self.addUser = function(id, name) {
-    if (id != self.localUser && !self.userMap[id]) {
+    if (id != self.localUser() && !self.userMap[id]) {
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
@@ -1128,7 +1128,7 @@ if (window.gapi && gapi.hangout) {
 
     // catch up with the group:
     // get current user list and current state
-    sudoku.users.localUser = hangout.getLocalParticipantId();
+    sudoku.users.localUser(hangout.getLocalParticipantId());
     sudoku.users.addUsers(hangout.getParticipants());
 
     var state = hangout.data.getState();
