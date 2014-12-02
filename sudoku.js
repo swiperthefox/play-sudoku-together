@@ -176,7 +176,7 @@ var CellState = function(i, j) {
 
   self.setValue = function(values) {
     self.values.removeAll();
-    self.values.push.apply(self.values, JSON.parse(values));
+    self.values.push.apply(self.values, values);
   };
   /*
    * Set the state of cell
