@@ -110,7 +110,7 @@
           </table>
 
           <div data-bind="foreach: $root.users.userList" id="user-list"> <!-- Allow user to choose which teammate's acitivities will be followed. -->
-            <div class="checkbox" data-bind="visible: id != $root.localUser">
+            <div class="checkbox" data-bind="visible: id != $root.users.localUser">
               <label>
                 <input type="checkbox" data-bind="checked: follow">
                 <span data-bind="text: name"></span>
