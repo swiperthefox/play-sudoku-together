@@ -60,6 +60,7 @@ var UserList = function() {
 
   self.addUser = function(id, name) {
     if (id != self.localUser && !self.userMap[id]) {
+      console.log("added new user:", id, ",", name);
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
