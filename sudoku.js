@@ -1155,7 +1155,7 @@ if (window.gapi && gapi.hangout) {
   hangout.data.onMessageReceived.add(function(event) {
     var sender = event.senderId;
     // ignore the message if it's send by local user or the sender
-    if (sender == sudoku.users.localUser ||
+    if (sender == sudoku.users.localUser() ||
         !sudoku.users.enabled(sender))
       return;
     var message = JSON.parse(event.message);
