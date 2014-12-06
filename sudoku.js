@@ -75,10 +75,11 @@ var UserList = function() {
 
   self.removeUser = function (id) {
     delete self.userMap[id];
-    for (var i=0; i<self.users().length; ++i) {
-      var user = self.users()[i];
+    var users = self.userList();
+    for (var i=0; i<users.length; ++i) {
+      var user = users[i];
       if (user.id == id) {
-        self.users.splice(i, 1);
+        self.userList.splice(i, 1);
         return;
       }
     }
@@ -225,58 +226,85 @@ var CellState = function(i, j) {
     if (self.isGiven()) return null;
     var result = null;
     if (v == '0') {
-      if (self.isNotMarker()) {
-        // if current values is not marker, we need to remove
-        // conflicts caused by the current value
-        result = {value: self.getValue(), delta: -1};
-      }
-      self.values.removeAll();
+      result = self.updateCell([]);
     } else {
-      var values = self.values();
-      var idx=0;
-      var l;
-      var original = self.getValue();
+      var values = self.values().slice(0);
+      var idx = 0;
       // find the position to insert v
       while (idx < values.length && v > values[idx]) ++idx;
 
-      if (idx<values.length && v == values[idx]) {
-        // remove v
-        self.values.splice(idx, 1);
-        // There are 3 ways in which how the the conflications may be changed:
-        switch (self.values().length) {
-        case 0:
-          // 1. [v] -> [], we need to remove conflicts caused by v
-          result = {value: v, delta: -1};
-          break;
-        case 1:
-          // 2. [v1, v2] -> [v1], we need to check conflicts caused by v1
-          result = {value: self.getValue(), delta: 1};
-          break;
-        default:
-          // 3. l > 1, no need to check any thing
-          result = null;
-        }
+      if (idx < values.length && v == values[idx]) {
+        values.splice(idx, 1);
       } else {
-        // add v at position idx
-        self.values.splice(idx, 0, v);
-        // There are 3 ways in which how the the conflications may be changed:
-        switch (self.values().length) {
-        case 1:
-          // 1. [] -> [v], we need to check conflicts caused by v
-          result = {value: v, delta: 1};
-          break;
-        case 2:
-          // 2. [v1] -> [v1, v], we need to remove conflicts caused by v1
-          result = {value: original, delta: -1};
-          break;
-        default:
-          // 3. marker becomes marker, no need to check any thing
-          result = null;
-        }
+        values.splice(idx, 0, v);
       }
-    };
+      result = self.updateCell(values);
+    }
+    // if (v == '0') {
+    //   if (self.isNotMarker()) {
+    //     // if current values is not marker, we need to remove
+    //     // conflicts caused by the current value
+    //     result = {value: self.getValue(), delta: -1};
+    //   }
+    //   self.values.removeAll();
+    // } else {
+    //   var values = self.values();
+    //   var idx=0;
+    //   var l;
+    //   var original = self.getValue();
+    //   // find the position to insert v
+    //   while (idx < values.length && v > values[idx]) ++idx;
+
+    //   if (idx<values.length && v == values[idx]) {
+    //     // remove v
+    //     self.values.splice(idx, 1);
+    //     // There are 3 ways in which how the the conflications may be changed:
+    //     switch (self.values().length) {
+    //     case 0:
+    //       // 1. [v] -> [], we need to remove conflicts caused by v
+    //       result = {value: v, delta: -1};
+    //       break;
+    //     case 1:
+    //       // 2. [v1, v2] -> [v1], we need to check conflicts caused by v1
+    //       result = {value: self.getValue(), delta: 1};
+    //       break;
+    //     default:
+    //       // 3. l > 1, no need to check any thing
+    //       result = null;
+    //     }
+    //   } else {
+    //     // add v at position idx
+    //     self.values.splice(idx, 0, v);
+    //     // There are 3 ways in which how the the conflications may be changed:
+    //     switch (self.values().length) {
+    //     case 1:
+    //       // 1. [] -> [v], we need to check conflicts caused by v
+    //       result = {value: v, delta: 1};
+    //       break;
+    //     case 2:
+    //       // 2. [v1] -> [v1, v], we need to remove conflicts caused by v1
+    //       result = {value: original, delta: -1};
+    //       break;
+    //     default:
+    //       // 3. marker becomes marker, no need to check any thing
+    //       result = null;
+    //     }
+    //   }
+    // };
     HANGOUTAPI.setValue(self.key, self.values());
     return result;
+  };
+
+  self.updateCell = function(values) {
+    var conflictPotential = {};
+    if (values.length == 1) {
+      conflictPotential['new'] = values[0];
+    }
+    if (self.values().length == 1) {
+      conflictPotential['old'] = self.getValue();
+    }
+    self.setValue(values);
+    return conflictPotential;
   };
 };
 
@@ -359,19 +387,33 @@ var BoardViewModel = function(row, col) {
   };
 
   /*
+   * Actions after changing a cell's value
+   */
+  self.afterChangeCell = function(i, j, conflictPotential) {
+    if (conflictPotential != null) {
+      self.conflictCheck(i, j, conflictPotential);
+    }
+    if (self.cells[i][j].isNotMarker()) {
+      self.highlightByValue({value: self.cells[i][j].getValue()});
+    }
+  };
+
+  /*
    * Add a value v to a given cell(i, j). If this may cause the number
    * of confliction change, check the conflicts again.
    */
   self.removeOrAddValue = function(i, j, v) {
     var conflictPotential = self.cells[i][j].removeOrAddValue(v);
-    if (conflictPotential != null) {
-      self.conflictCheck(i, j, conflictPotential.value, conflictPotential.delta);
-    }
-    if (self.cells[i][j].isNotMarker() && self.cells[i][j].getValue()==v) {
-      self.highlightByValue({value: v});
-    }
+    self.afterChangeCell(i, j, conflictPotential);
   };
 
+  /*
+   * Set the value of given cell
+   */
+  self.updateCell = function(i, j, values) {
+    var conflictPotential = self.cells[i][j].updateValue(values);
+    self.afterChangeCell(conflictPotential);
+  };
   /*
    * Test if two given cells are peers in rows, columns or squrares
    */
@@ -391,14 +433,27 @@ var BoardViewModel = function(row, col) {
    * conflictCount by delta. (delta may be -1, which means an
    * confliction caused by v is resolved).
    */
-  self.conflictCheck = function(row, col, v, delta) {
+  self.conflictCheck = function(row, col, conflict) {
+    var newValue = conflict['new'];
+    var oldValue = conflict['old'];
+
     var filled = 0;
     var confict = 0;
     var currentCell = self.cells[row][col];
     self.forAllCells(function updateConfliction(i, j, cell) {
       filled += cell.isNotMarker()?1:0;
       var isPeer = self.isPeer(i, j, row, col);
-      if (isPeer && cell.isNotMarker() && v == cell.getValue()) {
+      if (isPeer && cell.isNotMarker()) {
+        var otherValue = cell.getValue();
+        var delta = 0;
+        if (newValue == otherValue) {
+          delta += 1;        // the other cell's conflict count +1
+          conflict += 1;     // total conflict change +1
+        }
+        if (oldValue == otherValue) {
+          delta -= 1;        // the other cell's conflict count -1
+          conflict -= 1;     // total conflict change -1
+        }
         cell.conflictCount(cell.conflictCount()+delta);
         currentCell.conflictCount(currentCell.conflictCount()+delta);
       }
@@ -881,7 +936,7 @@ var GameEditorViewModel = function(board) {
   self.editedGameString = ko.observable("");
   self.updateCells = true;
   self.name = "Edit";
-
+  self.editing = false;
 
   function normalizeGameString(gameString) {
     gameString = gameString.replace(/[^1-9\s]/g, '.');
@@ -909,6 +964,10 @@ var GameEditorViewModel = function(board) {
   self.start = function(arg, notify) {
     self.notify = notify;
     self.editedGameString(arg.gameString || emptyGame);
+    if (self.editing) return;  // already in edit mode, don't need to setup the controls
+
+    // set up the controls
+    self.editing = true;
     $('#game-pane').on('click', '.cell', function(e) {
       var cell = ko.dataFor(this);
       if (self.oldFocused) {
@@ -939,6 +998,7 @@ var GameEditorViewModel = function(board) {
   self.stop = function() {
     $('#game-pane').off();
     self.editedGameString("");
+    self.editing = false;
   };
 
   /*
@@ -1178,36 +1238,53 @@ if (window.gapi && gapi.hangout) {
    */
   hangout.data.onStateChanged.add(function(event) {
     console.log(event);
-    // var changedKeys = event.addedKeys;
-    // var mode = event.state['mode'];
+    var changedKeys = event.addedKeys;
+    var mode = event.state['mode'];
 
-    // for (var i=0; i<changedKeys.length; ++i) {
-    //   var item = changedKeys[i];
-    //   var key = item.key;
-    //   switch(item.key) {
-    //   case 'mode':
-    //     if (item.value == 'play') {
-    //       sudoku.toPlayMode();
-    //     } else {
-    //       sudoku.changeModeByName(item.value);
-    //     }
-    //     break;
-    //   case 'gameString':
-    //     sudoku.setNewGame(item.value);
-    //     break;
-    //   // case 'puzzleID':
-    //   //   self.puzzleChooser.setPuzzleId(item.value);
-    //   //   break;
-    //   default:
-    //     if (item.key[0] != 'c') break;
-    //     var row = parseInt(key[1]);
-    //     var col = parseInt(key[3]);
-    //     var cell = sudoku.board.cells[row][col];
-    //     cell.setValue(JSON.parse(item.value));
-    //     if (mode == 'edit') {
-    //       cell.isGiven(item.value.length == 1);
-    //     };
-    //   }
-    // }
+    switch (mode) {
+    case 'List':
+      // current mode is 'List', we only need to update the puzzleID
+      var pid = event.state['puzzleID'];
+      sudoku.switchToModeByName('List', {puzzleID: pid}, false);
+      break;
+    case 'Edit':
+      // current mode is 'Edit', just update the editedGameString
+      var editorGameString = event.state['editorGameString'];
+      sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
+      break;
+    case 'Play':
+      // when the mode is 'Play', it is complicated. There are several
+      // different ways to change the state:
+      // 1. Just switched to 'Play' mode, (if 'mode' is in changedKeys)
+      // 2. already in 'Play' mode, only the values of some cell is
+      // changed ('mode' will not in changedKeys)
+
+      // first, check if 'mode' is in changedKeys
+      var modeChange = false;
+      for (var i=0; i<changedKeys.length; ++i) {
+        if (changedKeys[i].key == 'mode') {
+          modeChange = true;
+          break;
+        }
+      }
+      if (modeChange) {
+        // we can pass the event.state directly to PlayModeViewModel's
+        // start method
+        sudoku.switchToModeByName('Play', event.state, false);
+      } else {
+        // update the cells mentioned in changedKeys
+        for (i=0; i<changedKeys.length; i++) {
+          var cellName = changedKeys[i].key;
+          if (cellName[0] != 'c') {
+            console.log("Unexpected key: ", cellName);
+            continue;
+          }
+          var row = parseInt(cellName[1]);
+          var col = parseInt(cellName[3]);
+          var cellValues = JSON.parse(changedKeys[i].value);
+          sudoku.board.updateCell(row, col, cellValues);
+        }
+      }
+    }
   });
 }
