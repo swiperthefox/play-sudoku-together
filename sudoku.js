@@ -238,7 +238,7 @@ var CellState = function(i, j) {
       } else {
         values.splice(idx, 0, v);
       }
-      result = self.updateCell(values);
+      result = self.updateValue(values);
     }
     // if (v == '0') {
     //   if (self.isNotMarker()) {
@@ -295,7 +295,7 @@ var CellState = function(i, j) {
     return result;
   };
 
-  self.updateCell = function(values) {
+  self.updateValue = function(values) {
     var conflictPotential = {};
     if (values.length == 1) {
       conflictPotential['new'] = values[0];
