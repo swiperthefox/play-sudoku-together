@@ -550,7 +550,7 @@ var BoardViewModel = function(row, col) {
   self.getSnapshot = function() {
     var result = {gameString: self.initGameString};
     self.forAllCells(function(i, j, cell) {
-      result['c'+i+'#'+j] = JSON.stringify(cell.values().slice(0));
+      result[cell.key] = JSON.stringify(cell.values().slice(0));
     });
     return result;
   };
