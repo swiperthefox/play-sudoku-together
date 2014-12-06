@@ -1041,7 +1041,7 @@ var SudokuGameViewModel = function() {
   self.switchToModeByName = function(modename, args, notify) {
     self.switchToMode(self.modes[modename], args, notify);
   };
-  
+
   /*
    * Stop choosing/editing new puzzle, go back to old puzzle.
    */
@@ -1279,7 +1279,7 @@ if (window.gapi && gapi.hangout) {
         // update the cells mentioned in changedKeys
         for (i=0; i<changedKeys.length; i++) {
           var cellName = changedKeys[i].key;
-          if (cellName[0] != 'c') {
+          if (cellName[0] != 'C') {
             console.log("Unexpected key: ", cellName);
             continue;
           }
