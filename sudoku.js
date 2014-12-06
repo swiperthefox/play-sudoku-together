@@ -240,57 +240,6 @@ var CellState = function(i, j) {
       }
       result = self.updateValue(values);
     }
-    // if (v == '0') {
-    //   if (self.isNotMarker()) {
-    //     // if current values is not marker, we need to remove
-    //     // conflicts caused by the current value
-    //     result = {value: self.getValue(), delta: -1};
-    //   }
-    //   self.values.removeAll();
-    // } else {
-    //   var values = self.values();
-    //   var idx=0;
-    //   var l;
-    //   var original = self.getValue();
-    //   // find the position to insert v
-    //   while (idx < values.length && v > values[idx]) ++idx;
-
-    //   if (idx<values.length && v == values[idx]) {
-    //     // remove v
-    //     self.values.splice(idx, 1);
-    //     // There are 3 ways in which how the the conflications may be changed:
-    //     switch (self.values().length) {
-    //     case 0:
-    //       // 1. [v] -> [], we need to remove conflicts caused by v
-    //       result = {value: v, delta: -1};
-    //       break;
-    //     case 1:
-    //       // 2. [v1, v2] -> [v1], we need to check conflicts caused by v1
-    //       result = {value: self.getValue(), delta: 1};
-    //       break;
-    //     default:
-    //       // 3. l > 1, no need to check any thing
-    //       result = null;
-    //     }
-    //   } else {
-    //     // add v at position idx
-    //     self.values.splice(idx, 0, v);
-    //     // There are 3 ways in which how the the conflications may be changed:
-    //     switch (self.values().length) {
-    //     case 1:
-    //       // 1. [] -> [v], we need to check conflicts caused by v
-    //       result = {value: v, delta: 1};
-    //       break;
-    //     case 2:
-    //       // 2. [v1] -> [v1, v], we need to remove conflicts caused by v1
-    //       result = {value: original, delta: -1};
-    //       break;
-    //     default:
-    //       // 3. marker becomes marker, no need to check any thing
-    //       result = null;
-    //     }
-    //   }
-    // };
     HANGOUTAPI.setValue(self.key, self.values());
     return result;
   };
@@ -842,7 +791,7 @@ var PuzzleListViewModel = function (board) {
   self.updateBoard = function(newValue) {
     self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ""});
     if (self.notify) {
-      HANGOUTAPI.submitDelta({mode: 'List', puzzleID: ''+self.puzzleID()});
+      HANGOUTAPI.submitDelta({mode: "List", puzzleID: ''+self.puzzleID()});
     }
   };
 
@@ -855,6 +804,7 @@ var PuzzleListViewModel = function (board) {
     }
     self.notify = notify;
     if (pid == self.puzzleID()) {
+      self.notify = false;
       self.updateBoard(pid);
     } else {
       self.puzzleID(pid);
@@ -1244,17 +1194,24 @@ if (window.gapi && gapi.hangout) {
     console.log(event);
     var changedKeys = event.addedKeys;
     var mode = event.state['mode'];
+    var lastWriter;
 
     switch (mode) {
     case 'List':
       // current mode is 'List', we only need to update the puzzleID
       var pid = event.state['puzzleID'];
-      sudoku.switchToModeByName('List', {puzzleID: pid}, false);
+      lastWriter = event.metadata['puzzleID'].lastWriter;
+      if (lastWriter != sudoku.users.localUser()) {
+        sudoku.switchToModeByName('List', {puzzleID: pid}, true);
+      }
       break;
     case 'Edit':
       // current mode is 'Edit', just update the editedGameString
       var editorGameString = event.state['editorGameString'];
-      sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
+      lastWriter = event.metadata['editorGameString'].lastWriter;
+      if (lastWriter != sudoku.users.localUser()) {
+        sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
+      }
       break;
     case 'Play':
       // when the mode is 'Play', it is complicated. There are several
@@ -1268,10 +1225,11 @@ if (window.gapi && gapi.hangout) {
       for (var i=0; i<changedKeys.length; ++i) {
         if (changedKeys[i].key == 'mode') {
           modeChange = true;
+          lastWriter = changedKeys[i].lastWriter;
           break;
         }
       }
-      if (modeChange) {
+      if (modeChange && lastWriter != sudoku.users.localUser()) {
         // we can pass the event.state directly to PlayModeViewModel's
         // start method
         sudoku.switchToModeByName('Play', event.state, false);
@@ -1279,6 +1237,8 @@ if (window.gapi && gapi.hangout) {
         // update the cells mentioned in changedKeys
         for (i=0; i<changedKeys.length; i++) {
           var cellName = changedKeys[i].key;
+          lastWriter = changedKeys[i].lastWriter;
+          if (lastWriter == sudoku.users.localUser()) continue;
           if (cellName[0] != 'C') {
             console.log("Unexpected key: ", cellName);
             continue;
