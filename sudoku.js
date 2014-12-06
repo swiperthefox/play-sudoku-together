@@ -361,7 +361,7 @@ var BoardViewModel = function(row, col) {
    */
   self.updateCell = function(i, j, values) {
     var conflictPotential = self.cells[i][j].updateValue(values);
-    self.afterChangeCell(conflictPotential);
+    self.afterChangeCell(i, j, conflictPotential);
   };
   /*
    * Test if two given cells are peers in rows, columns or squrares
