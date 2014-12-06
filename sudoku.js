@@ -789,9 +789,10 @@ var PuzzleListViewModel = function (board) {
   self.notify = true;
 
   self.updateBoard = function(newValue) {
+    console.log("updateboard");
     self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ""});
     if (self.notify) {
-      HANGOUTAPI.submitDelta({mode: "List", puzzleID: ''+self.puzzleID()});
+      window.HANGOUTAPI.submitDelta({mode: "List", puzzleID: ''+self.puzzleID()});
     }
   };
 
@@ -804,8 +805,6 @@ var PuzzleListViewModel = function (board) {
     }
     self.notify = notify;
     if (pid == self.puzzleID()) {
-      self.notify = false;
-      self.updateBoard(pid);
     } else {
       self.puzzleID(pid);
     }
