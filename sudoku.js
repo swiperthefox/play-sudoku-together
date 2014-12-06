@@ -226,7 +226,7 @@ var CellState = function(i, j) {
     if (self.isGiven()) return null;
     var result = null;
     if (v == '0') {
-      result = self.updateCell([]);
+      result = self.updateValue([]);
     } else {
       var values = self.values().slice(0);
       var idx = 0;
