@@ -1040,6 +1040,8 @@ var SudokuGameViewModel = function() {
 
   self.switchToModeByName = function(modename, args, notify) {
     self.switchToMode(self.modes[modename], args, notify);
+  };
+  
   /*
    * Stop choosing/editing new puzzle, go back to old puzzle.
    */
