@@ -1064,6 +1064,8 @@ var SudokuGameViewModel = function() {
 
   self.strings = ko.observable(strings['en']);
 
+  console.log(self.strings());
+
   /*
    * Switch to given mode: first stop current mode, then start the new
    * mode.
@@ -1234,6 +1236,7 @@ if (window.gapi && gapi.hangout) {
     var locale = hangout.getLocalParticipantLocale();
     console.log(locale);
     sudoku.strings(strings[locale] || strings['en']);
+    console.log(sudoku.strings());
 
     var state = hangout.data.getState();
     if (state.mode) {
