@@ -12,7 +12,6 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
   <head>
-    <base href="https://play-sudoku-together.googlecode.com/git/" target="_blank">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Play Sudoku Together</title>
@@ -42,7 +41,7 @@
     <!-- <script src="knockout-3.1.0.js"></script> -->
     <!-- <link rel="stylesheet" href="stylesheet/normalize.css"> -->
     <!-- <script src="js/vendor/modernizr.js"></script> -->
-    <link href="main.css" rel="stylesheet">
+    <link href="https://play-sudoku-together.googlecode.com/git/main.css" rel="stylesheet">
   </head>
   <body onselectstart="return false;">
     <!-- Add your site or application content here -->
@@ -185,7 +184,7 @@
     <!-- <script src="static/js/libs/hangup_client.js"></script>             -->
     <!-- <script src="main.js"></script> -->
     <script src="https://plus.google.com/hangouts/_/api/v1/hangout.js"></script>    
-    <script src="sudoku.js"></script>
+    <script src="https://play-sudoku-together.googlecode.com/git/sudoku.js"></script>
   </body>
 </html>
 
