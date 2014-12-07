@@ -149,6 +149,26 @@ var utils = {
     return result;
   }
 };
+
+var palette = {
+  normalColor:  {
+    'pointer': '#a0c5e8',
+    'focused': '#60e069',
+    'peerHLD': '#c3f3f7',
+    'white': '#ffffff'
+  }
+};
+
+palette.dimmedColors = (function(mask) {
+  var nc = palette.normalColor;
+  return {
+    'pointer': utils.maskedColor(nc['pointer'], mask),
+    'focused': utils.maskedColor(nc['focused'], mask),
+    'peerHLD': utils.maskedColor(nc['peerHLD'], mask),
+    'white': utils.maskedColor(nc['white'], mask)
+    };
+})('#dddddd');
+
 /*
  * Represents the infomation in one cell.
  */
@@ -174,19 +194,7 @@ var CellState = function(i, j) {
 
   // colors used for the background of different kind of cells
   self.colors = ko.computed(function() {
-    var normalColor = {
-    'pointer': '#a0c5e8',
-    'focused': '#60e069',
-    'peerHLD': '#c3f3f7',
-    'white': '#ffffff'
-    };
-    var mask = '#dddddd';
-    var dimedColors = {'pointer': utils.maskedColor(normalColor['pointer'], mask),
-                       'focused': utils.maskedColor(normalColor['focused'], mask),
-                       'peerHLD': utils.maskedColor(normalColor['peerHLD'], mask),
-                       'white': utils.maskedColor(normalColor['white'], mask)
-                      };
-    return self.isGiven()? dimedColors :normalColor;
+    return self.isGiven()? palette.dimmedColors :palette.normalColor;
   }, this);
 
   /*
