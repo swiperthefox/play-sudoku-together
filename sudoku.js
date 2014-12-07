@@ -1216,6 +1216,7 @@ if (window.gapi && gapi.hangout) {
     };
 
     var locale = hangout.getLocalParticipantLocale();
+    console.log(locale);
     sudoku.strings(strings[locale] || strings['en']);
 
     // catch up with the group:
