@@ -12,9 +12,10 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
   <head>
+    <base href="https://play-sudoku-together.googlecode.com/git/" target="_blank">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title></title>
+    <title>Play Sudoku Together</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1,
 				   maximum-scale=1, user-scalable=0">
