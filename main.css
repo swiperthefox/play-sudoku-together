@@ -47,6 +47,7 @@ div#controls {
     height: 20px;
     vertical-align: text-top;
     outline: none;
+    text-align: center;
 }
 .corner-cell {
     width: 20px;
@@ -56,6 +57,7 @@ div#controls {
     text-align: center;
 }
 .side-cell {
+    text-align: center;
     width: 20px;
     height: 40px;
     font-size: 130%;
@@ -68,7 +70,7 @@ div#controls {
 
 .side-cell span, .top-cell span {
     height: 16px !important;
-    margin: auto auto;
+
 }
 /* For the bold borders */
 .cell.cell-top-border {

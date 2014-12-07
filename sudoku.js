@@ -8,6 +8,34 @@ window.HANGOUTAPI = {
   sendMessage: function(message){console.log("message:", message);}
 };
 
+var strings = {
+  'en': {
+    'title': 'SUDOKU',
+    'newGame': 'New Game',
+    'restart': 'Restart',
+    'resConfirm': 'Are you sure to start over?',
+    'resWarning': 'Restart the puzzle will lost all the progresses you have made!',
+    'cancel': 'Cancel',
+    'start': 'Start',
+    'hint': 'The heart shaped puzzle is puzzle #51.',
+    'listtitle': 'Puzzle ID:',
+    'List': 'List',
+    'Edit': 'Edit'
+  },
+  'zh': {
+    'title': '数独',
+    'newGame': '新谜题',
+    'restart': '重置',
+    'resConfirm': '确定重新开始？',
+    'resWarning': '重新开始会失去所有已经完成的部分．',
+    'cancel': '取消',
+    'start': '开始',
+    'hint': '心形题的编号是５１．',
+    'listtitle': '谜题编号',
+    'List': '选择',
+    'Edit': '输入'
+  }
+};
 /*
  * Global variable that controls state update and message sending
  */
@@ -99,7 +127,28 @@ var UserList = function() {
     return self.userMap[uid].follow();
   };
 };
+var utils = {
+  hexToRGB: function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+  },
+  maskedColor: function(color, mask) {
+    console.log("color: ", color, "mask:", mask);
+    color = utils.hexToRGB(color);
+    mask = utils.hexToRGB(mask);
+    var r = Math.round(color.r * mask.r / 256);
+    var g = Math.round(color.g * mask.g / 256);
+    var b = Math.round(color.b * mask.b / 256);
 
+    var result = 'rgb(' + r + ',' + g + ',' + b + ')';
+    console.log(result);
+    return result;
+  }
+};
 /*
  * Represents the infomation in one cell.
  */
@@ -122,6 +171,24 @@ var CellState = function(i, j) {
     return self.values().length == 1;
   }, this);
   self.key = 'C' + i + '#' + j;
+
+  // colors used for the background of different kind of cells
+  self.colors = ko.computed(function() {
+    var normalColor = {
+    'pointer': '#a0c5e8',
+    'focused': '#60e069',
+    'peerHLD': '#c3f3f7',
+    'white': '#ffffff'
+    };
+    var mask = '#dddddd';
+    var dimedColors = {'pointer': utils.maskedColor(normalColor['pointer'], mask),
+                       'focused': utils.maskedColor(normalColor['focused'], mask),
+                       'peerHLD': utils.maskedColor(normalColor['peerHLD'], mask),
+                       'white': utils.maskedColor(normalColor['white'], mask)
+                      };
+    return self.isGiven()? dimedColors :normalColor;
+  }, this);
+
   /*
    * background of the cell has the following possible values, from lowest priority:
    * 1. normal color: white
@@ -131,11 +198,11 @@ var CellState = function(i, j) {
    * 5. pointer: mouse is pointing to this cell
    */
   self.background = ko.computed(function() {
-    return ((self.pointerHighlight() && "#a0c5e8") ||
-            (self.isFocused()        && "#60e069") ||
-            (self.peerHighlight()    && "#c3f3f7") ||
-            (self.isGiven()          && "#dddddd") ||
-            (true                    && "#ffffff"));
+    var colors = self.colors();
+    return ((self.pointerHighlight() && colors['pointer']) ||
+            (self.isFocused()        && colors['focused']) ||
+            (self.peerHighlight()    && colors['peerHLD']) ||
+            (true                    && colors['white']));
   }, this);
 
   /*
@@ -987,6 +1054,8 @@ var SudokuGameViewModel = function() {
     'Edit': self.gameEditor
   };
 
+  self.strings = ko.observable(strings['en']);
+
   /*
    * Switch to given mode: first stop current mode, then start the new
    * mode.
@@ -1154,6 +1223,10 @@ if (window.gapi && gapi.hangout) {
     sudoku.users.localUser(hangout.getLocalParticipantId());
     sudoku.users.addUsers(hangout.getParticipants());
 
+    var locale = hangout.getLocalParticipantLocale();
+    console.log(locale);
+    sudoku.strings(strings[locale]);
+
     var state = hangout.data.getState();
     if (state.mode) {
       sudoku.catchUp(state);
@@ -1204,13 +1277,14 @@ if (window.gapi && gapi.hangout) {
     var changedKeys = event.addedKeys;
     var mode = event.state['mode'];
     var lastWriter;
+    var localUser = sudoku.users.localUser();
 
     switch (mode) {
     case 'List':
       // current mode is 'List', we only need to update the puzzleID
       var pid = event.state['puzzleID'];
       lastWriter = event.metadata['puzzleID'].lastWriter;
-      if (lastWriter != sudoku.users.localUser()) {
+      if (lastWriter != localUser) {
         sudoku.switchToModeByName('List', {puzzleID: pid}, true);
       }
       break;
@@ -1218,7 +1292,7 @@ if (window.gapi && gapi.hangout) {
       // current mode is 'Edit', just update the editedGameString
       var editorGameString = event.state['editorGameString'];
       lastWriter = event.metadata['editorGameString'].lastWriter;
-      if (lastWriter != sudoku.users.localUser()) {
+      if (lastWriter != localUser) {
         sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
       }
       break;
@@ -1238,7 +1312,7 @@ if (window.gapi && gapi.hangout) {
           break;
         }
       }
-      if (modeChange && lastWriter != sudoku.users.localUser()) {
+      if (modeChange && lastWriter != localUser) {
         // we can pass the event.state directly to PlayModeViewModel's
         // start method
         sudoku.switchToModeByName('Play', event.state, false);
@@ -1247,7 +1321,7 @@ if (window.gapi && gapi.hangout) {
         for (i=0; i<changedKeys.length; i++) {
           var cellName = changedKeys[i].key;
           lastWriter = changedKeys[i].lastWriter;
-          if (lastWriter == sudoku.users.localUser()) continue;
+          if (lastWriter == localUser) continue;
           if (cellName[0] != 'C') {
             console.log("Unexpected key: ", cellName);
             continue;

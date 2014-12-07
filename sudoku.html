@@ -37,7 +37,7 @@
   </head>
   <body onselectstart="return false;">
     <!-- Add your site or application content here -->
-    <H1>数独</H1>
+    <H1 data-bind="text: strings().title">数独</H1>
     <div id="template-container" >
       <table id="game-pane" class="game-pane" tabindex="0" 
 	     data-bind="with: board">
@@ -109,17 +109,17 @@
           </div>
 
           <div id="new-game-menu" class="btn-group dropup open">
-            <button type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown">
+            <button type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" data-bind="text: $root.strings().newGame">
               新谜题 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu small-menu" role="menu" 
 		data-bind="foreach: $root.newGameMethods">
-              <li class="new-game"><span data-bind="text: name">输入</span></li>
+              <li class="new-game"><span data-bind="text: $root.strings()[name]">输入</span></li>
             </ul>
 
             <!-- reset game button, confirmation dialog -->
             <!-- Button trigger modal -->
-            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal">
+            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal" data-bind="text: $root.strings().restart">
               重置
             </button>
 
@@ -129,14 +129,14 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">确定重新开始？</h4>
+                    <h4 class="modal-title" id="myModalLabel" data-bind="text: $root.strings().resConfirm">确定重新开始？</h4>
                   </div>
                   <div class="modal-body">
-                    重新开始会失去所有已经完成的部分．
+                    <span data-bind="text: $root.strings().resWarning">重新开始会失去所有已经完成的部分．</span>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">不要重置</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.playMode.restartGame">重置</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="text: $root.strings().cancel">不要重置</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.playMode.restartGame, text: $root.strings().restart">重置</button>
                   </div>
                 </div>
               </div>
@@ -148,15 +148,15 @@
         <div id="manual-entry" data-bind="visible: mode().name == 'Edit', with: gameEditor">
           <textarea rows="9" data-bind="value: editedGameString, valueUpdate: 'input'"></textarea>
           <div class="btn-group">
-            <button class="btn btn-block" data-bind="click: $root.startNewGame">开始</button>
-            <button class="btn btn-block" data-bind="click: $root.cancelEdit">取消</button>
+            <button class="btn btn-block" data-bind="click: $root.startNewGame, text:$root.strings().start">开始</button>
+            <button class="btn btn-block" data-bind="click: $root.cancelEdit, text: $root.strings().cancel">取消</button>
           </div>
         </div>
 	
         <div id="local-list" data-bind="visible: mode().name == 'List', with: puzzleChooser">
           <div class="form-group">
             <label for="difficult-level">
-              谜题编号
+              <span data-bind="text: $root.strings().listtitle">谜题编号</span>
               <span style="font-size: 90%" data-bind="text: '(1 -' + puzzleList.length + ')'"></span>
             </label>
 
@@ -165,10 +165,10 @@
                                attr: {max: puzzleList.length},
                                valueUpdate: 'input'">
           </div>
-          <span style="font-size: 60%; width: 100%">心形题的编号是５１．</span>
+          <span style="font-size: 60%; width: 100%" data-bind="text: $root.strings().hint">心形题的编号是５１．</span>
           <div class="btn-group">
-            <button class="btn btn-block" data-bind="click: $root.startNewGame">开始</button>
-            <button class="btn btn-block" data-bind="click: $root.cancelEdit">取消</button>
+            <button class="btn btn-block" data-bind="click: $root.startNewGame, text: $root.strings().start">开始</button>
+            <button class="btn btn-block" data-bind="click: $root.cancelEdit, text: $root.strings().cancel">取消</button>
           </div>
         </div>          
       </div>
