@@ -22,7 +22,7 @@ var strings = {
     'List': 'List',
     'Edit': 'Edit'
   },
-  'zh': {
+  'zh-CN': {
     'title': '数独',
     'newGame': '新谜题',
     'restart': '重置',
@@ -1225,7 +1225,7 @@ if (window.gapi && gapi.hangout) {
 
     var locale = hangout.getLocalParticipantLocale();
     console.log(locale);
-    sudoku.strings(strings[locale]);
+    sudoku.strings(strings[locale] || strings['en']);
 
     var state = hangout.data.getState();
     if (state.mode) {
