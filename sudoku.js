@@ -805,6 +805,7 @@ var PuzzleListViewModel = function (board) {
     }
     self.notify = notify;
     if (pid == self.puzzleID()) {
+      self.updateBoard(pid);
     } else {
       self.puzzleID(pid);
     }
