@@ -1059,6 +1059,9 @@ var SudokuGameViewModel = function() {
   };
 
   self.strings = ko.observable(strings['en']);
+  self.strings.subscribe(function(newValue) {
+    console.log(newValue);
+  });
 
   /*
    * Switch to given mode: first stop current mode, then start the new
