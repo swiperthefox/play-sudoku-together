@@ -1275,109 +1275,111 @@ if (window.gapi && gapi.hangout) {
     if (state.mode) {
       sudoku.catchUp(state);
     }
-  });
 
-  hangout.onParticipantsEnabled.add(function(event) {
-    var newUsers = event.enabledParticipants;
-    sudoku.users.addUsers(newUsers);
-  });
-  hangout.onParticipantsDisabled.add(function(event) {
-    var leaved = event.disabledParticipants;
-    sudoku.users.removeUsers(leaved);
-  });
-  /*
-   * Handle received messages. There is only one kind of messages:
-   * Highlighting commands.
-   *
-   * {shape: 'row', row: 1, col: 1},
-   *     where shape can be 'row', 'col', 'cell', 'square', 'value'
-   */
-  hangout.data.onMessageReceived.add(function(event) {
-    var sender = event.senderId;
-    // ignore the message if it's send by local user or the sender
-    if (sender == sudoku.users.localUser() ||
-        !sudoku.users.enabled(sender))
-      return;
-    var message = JSON.parse(event.message);
-    sudoku.board.highlightUnit(message, false);
-  });
 
-  /*
-   * Handle state change event. Sudoku state has the following properties:
-   *
-{
-   mode: 'play', // can be 'edit', 'list'
-   gameString: '0102', // used 'play' mode
-   c0#0: [],  // used in play mode
-   c0#1: [1,2],
-   ...
-   c8#8: [9]
-   puzzleID: 12  // used in 'list' mode
-   editorGameString: "120..." //used in "edit" mode
-}
-   *
-   */
-  hangout.data.onStateChanged.add(function(event) {
-    var changedKeys = event.addedKeys;
-    var mode = event.state['mode'];
-    var lastWriter;
-    var localUser = sudoku.users.localUser();
+    hangout.onParticipantsEnabled.add(function(event) {
+      var newUsers = event.enabledParticipants;
+      sudoku.users.addUsers(newUsers);
+    });
+    hangout.onParticipantsDisabled.add(function(event) {
+      var leaved = event.disabledParticipants;
+      sudoku.users.removeUsers(leaved);
+    });
+    /*
+     * Handle received messages. There is only one kind of messages:
+     * Highlighting commands.
+     *
+     * {shape: 'row', row: 1, col: 1},
+     *     where shape can be 'row', 'col', 'cell', 'square', 'value'
+     */
+    hangout.data.onMessageReceived.add(function(event) {
+      var sender = event.senderId;
+      // ignore the message if it's send by local user or the sender
+      if (sender == sudoku.users.localUser() ||
+          !sudoku.users.enabled(sender))
+        return;
+      var message = JSON.parse(event.message);
+      sudoku.board.highlightUnit(message, false);
+    });
 
-    switch (mode) {
-    case 'List':
-      // current mode is 'List', we only need to update the puzzleID
-      var pid = event.state['puzzleID'];
-      lastWriter = event.metadata['puzzleID'].lastWriter;
-      if (lastWriter != localUser) {
-        sudoku.switchToModeByName('List', {puzzleID: pid}, true);
-      }
-      break;
-    case 'Edit':
-      // current mode is 'Edit', just update the editedGameString
-      var editorGameString = event.state['editorGameString'];
-      lastWriter = event.metadata['editorGameString'].lastWriter;
-      if (lastWriter != localUser) {
-        sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
-      }
-      break;
-    case 'Play':
-      // when the mode is 'Play', it is complicated. There are several
-      // different ways to change the state:
-      // 1. Just switched to 'Play' mode, (if 'mode' is in changedKeys)
-      // 2. already in 'Play' mode, only the values of some cell is
-      // changed ('mode' will not in changedKeys)
+    /*
+     * Handle state change event. Sudoku state has the following properties:
+     *
+     {
+     mode: 'play', // can be 'edit', 'list'
+     gameString: '0102', // used 'play' mode
+     c0#0: [],  // used in play mode
+     c0#1: [1,2],
+     ...
+     c8#8: [9]
+     puzzleID: 12  // used in 'list' mode
+     editorGameString: "120..." //used in "edit" mode
+     }
+     *
+     */
+    hangout.data.onStateChanged.add(function(event) {
+      var changedKeys = event.addedKeys;
+      var mode = event.state['mode'];
+      var lastWriter;
+      var localUser = sudoku.users.localUser();
 
-      // first, check if 'mode' is in changedKeys
-      var modeChange = false;
-      for (var i=0; i<changedKeys.length; ++i) {
-        if (changedKeys[i].key == 'mode') {
-          modeChange = true;
-          lastWriter = changedKeys[i].lastWriter;
-          break;
+      switch (mode) {
+      case 'List':
+        // current mode is 'List', we only need to update the puzzleID
+        var pid = event.state['puzzleID'];
+        lastWriter = event.metadata['puzzleID'].lastWriter;
+        if (lastWriter != localUser) {
+          sudoku.switchToModeByName('List', {puzzleID: pid}, true);
         }
-      }
-      if (modeChange && lastWriter != localUser) {
-        // we can pass the event.state directly to PlayModeViewModel's
-        // start method
-        sudoku.switchToModeByName('Play', event.state, false);
-      } else {
-        // update the cells mentioned in changedKeys
-        for (i=0; i<changedKeys.length; i++) {
-          var cellName = changedKeys[i].key;
-          lastWriter = changedKeys[i].lastWriter;
-          if (lastWriter == localUser) continue;
-          if (cellName[0] != 'C') {
-            continue;
+        break;
+      case 'Edit':
+        // current mode is 'Edit', just update the editedGameString
+        var editorGameString = event.state['editorGameString'];
+        lastWriter = event.metadata['editorGameString'].lastWriter;
+        if (lastWriter != localUser) {
+          sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
+        }
+        break;
+      case 'Play':
+        // when the mode is 'Play', it is complicated. There are several
+        // different ways to change the state:
+        // 1. Just switched to 'Play' mode, (if 'mode' is in changedKeys)
+        // 2. already in 'Play' mode, only the values of some cell is
+        // changed ('mode' will not in changedKeys)
+
+        // first, check if 'mode' is in changedKeys
+        var modeChange = false;
+        for (var i=0; i<changedKeys.length; ++i) {
+          if (changedKeys[i].key == 'mode') {
+            modeChange = true;
+            lastWriter = changedKeys[i].lastWriter;
+            break;
           }
-          var row = parseInt(cellName[1]);
-          var col = parseInt(cellName[3]);
-          var cellValues = JSON.parse(changedKeys[i].value);
-          sudoku.board.updateCell(row, col, cellValues);
+        }
+        if (modeChange && lastWriter != localUser) {
+          // we can pass the event.state directly to PlayModeViewModel's
+          // start method
+          sudoku.switchToModeByName('Play', event.state, false);
+        } else {
+          // update the cells mentioned in changedKeys
+          for (i=0; i<changedKeys.length; i++) {
+            var cellName = changedKeys[i].key;
+            lastWriter = changedKeys[i].lastWriter;
+            if (lastWriter == localUser) continue;
+            if (cellName[0] != 'C') {
+              continue;
+            }
+            var row = parseInt(cellName[1]);
+            var col = parseInt(cellName[3]);
+            var cellValues = JSON.parse(changedKeys[i].value);
+            sudoku.board.updateCell(row, col, cellValues);
+          }
         }
       }
-    }
+    });
   });
 }
+
 
 ko.applyBindings(sudoku);
 sudoku.board.setBoardState({gameString: ".58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5...."});
