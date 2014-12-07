@@ -322,6 +322,7 @@ var BoardViewModel = function(row, col) {
 
   self.reset = function() {
     self.setBoardState({gameString: self.initGameString});
+
   };
 
   self.gameStringFromCells = function() {
@@ -643,6 +644,16 @@ var PlayModeViewModel = function(board) {
    */
   self.restartGame = function() {
     self.board.reset();
+    self.submitStatus();
+  };
+
+  /*
+   * Submit current status to hangout server
+   */
+  self.submitStatus = function() {
+    var snapshot = self.board.getSnapshot();
+    snapshot.mode = "Play";
+    HANGOUTAPI.submitDelta(snapshot);
   };
 
   /*
@@ -679,9 +690,7 @@ var PlayModeViewModel = function(board) {
       self.setupControls();
     }
     if (notify) {
-      var snapshot = self.board.getSnapshot();
-      snapshot.mode = "Play";
-      HANGOUTAPI.submitDelta(snapshot);
+      self.submitStatus();
     }
   };
 
