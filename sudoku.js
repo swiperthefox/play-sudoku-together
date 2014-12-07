@@ -1205,10 +1205,6 @@ var SelectionGesture = function() {
 
 var sudoku = new SudokuGameViewModel();
 
-ko.applyBindings(sudoku);
-sudoku.board.setBoardState({gameString: ".58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5...."});
-
-
 if (window.gapi && gapi.hangout) {
   var hangout = gapi.hangout;
   hangout.onApiReady.add(function() {
@@ -1346,3 +1342,6 @@ if (window.gapi && gapi.hangout) {
     }
   });
 }
+
+ko.applyBindings(sudoku);
+sudoku.board.setBoardState({gameString: ".58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5...."});
