@@ -6,14 +6,12 @@
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
-    <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>    
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
   <head>
-    <base href="https://play-sudoku-together.googlecode.com/git/">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title></title>
@@ -43,11 +41,11 @@
     <!-- <script src="knockout-3.1.0.js"></script> -->
     <!-- <link rel="stylesheet" href="stylesheet/normalize.css"> -->
     <!-- <script src="js/vendor/modernizr.js"></script> -->
-    <link href="https://play-sudoku-together.googlecode.com/git/main.css" rel="stylesheet">
+    <link href="main.css" rel="stylesheet">
   </head>
   <body onselectstart="return false;">
     <!-- Add your site or application content here -->
-    <H1>数独</H1>
+    <H1 data-bind="text: strings().title">SUDOKU</H1>
     <div id="template-container" >
       <table id="game-pane" class="game-pane" tabindex="0" 
 	     data-bind="with: board">
@@ -110,27 +108,27 @@
           </table>
 
           <div data-bind="foreach: $root.users.userList" id="user-list"> <!-- Allow user to choose which teammate's acitivities will be followed. -->
-            <div class="checkbox" data-bind="visible: id != $root.users.localUser()">
+            <div class="checkbox">
               <label>
-                <input type="checkbox" data-bind="checked: follow">
+                <input type="checkbox" data-bind="checked: state">
                 <span data-bind="text: name"></span>
               </label>
             </div>
           </div>
 
           <div id="new-game-menu" class="btn-group dropup open">
-            <button type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown">
-              新谜题 <span class="caret"></span>
+            <button type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" data-bind="text: $root.strings()['newGame']">
+              New Game <span class="caret"></span>
             </button>
             <ul class="dropdown-menu small-menu" role="menu" 
 		data-bind="foreach: $root.newGameMethods">
-              <li class="new-game"><span data-bind="text: name">输入</span></li>
+              <li class="new-game"><span data-bind="text: $root.strings()[name]"></span></li>
             </ul>
 
             <!-- reset game button, confirmation dialog -->
             <!-- Button trigger modal -->
-            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal">
-              重置
+            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal" data-bind="text: $root.strings().restart">
+              Restart
             </button>
 
             <!-- Modal -->
@@ -139,34 +137,34 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">确定重新开始？</h4>
+                    <h4 class="modal-title" id="myModalLabel" data-bind="text: $root.strings().resConfirm">Are you sure to start over?</h4>
                   </div>
                   <div class="modal-body">
-                    重新开始会失去所有已经完成的部分．
+                    <span data-bind="text: $root.strings().resWarning">Restarting the puzzle will lose all the progress that you have made!</span>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">不要重置</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.playMode.restartGame">重置</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" data-bind="text: $root.strings().cancel">Cancel</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.playMode.restartGame"><span data-bind="text: $root.strings().restart">Restart</span></button>
                   </div>
                 </div>
               </div>
             </div>
 
           </div> 
-        </div> <!-- end of "controls" -->
+        </div> <!-- end of "play-controls" -->
 
         <div id="manual-entry" data-bind="visible: mode().name == 'Edit', with: gameEditor">
           <textarea rows="9" data-bind="value: editedGameString, valueUpdate: 'input'"></textarea>
           <div class="btn-group">
-            <button class="btn btn-block" data-bind="click: $root.startNewGame">开始</button>
-            <button class="btn btn-block" data-bind="click: $root.cancelEdit">取消</button>
+            <button class="btn btn-block" data-bind="click: $root.startNewGame, text:$root.strings().start">Start</button>
+            <button class="btn btn-block" data-bind="click: $root.cancelEdit, text: $root.strings().cancel">Cancel</button>
           </div>
         </div>
 	
         <div id="local-list" data-bind="visible: mode().name == 'List', with: puzzleChooser">
           <div class="form-group">
             <label for="difficult-level">
-              谜题编号
+              <span data-bind="text: $root.strings().listtitle">Puzzle ID</span>
               <span style="font-size: 90%" data-bind="text: '(1 -' + puzzleList.length + ')'"></span>
             </label>
 
@@ -175,17 +173,18 @@
                                attr: {max: puzzleList.length},
                                valueUpdate: 'input'">
           </div>
-          <span style="font-size: 60%; width: 100%">心形题的编号是５１．</span>
+          <span style="font-size: 60%; width: 100%" data-bind="text: $root.strings().hint">The heart shaped puzzle is puzzle #51.</span>
           <div class="btn-group">
-            <button class="btn btn-block" data-bind="click: $root.startNewGame">开始</button>
-            <button class="btn btn-block" data-bind="click: $root.cancelEdit">取消</button>
+            <button class="btn btn-block" data-bind="click: $root.startNewGame, text: $root.strings().start">Start</button>
+            <button class="btn btn-block" data-bind="click: $root.cancelEdit, text: $root.strings().cancel">Cancel</button>
           </div>
         </div>          
       </div>
     </div>
     <!-- <script src="static/js/libs/hangup_client.js"></script>             -->
     <!-- <script src="main.js"></script> -->
-    <script src="https://play-sudoku-together.googlecode.com/git/sudoku.js"></script>
+    <script src="https://plus.google.com/hangouts/_/api/v1/hangout.js"></script>    
+    <script src="sudoku.js"></script>
   </body>
 </html>
 
