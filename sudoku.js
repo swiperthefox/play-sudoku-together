@@ -1035,7 +1035,7 @@ var SudokuGameViewModel = function() {
   $('#new-game-menu').on('click', 'li.new-game', function(e) {
     e.stopPropagation();
     var data = ko.dataFor(this);
-    self.getNewGame(data);
+    self.getNewGame(data, true);
   });
 };
 
