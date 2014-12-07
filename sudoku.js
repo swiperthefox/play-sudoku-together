@@ -137,7 +137,6 @@ var utils = {
     } : null;
   },
   maskedColor: function(color, mask) {
-    console.log("color: ", color, "mask:", mask);
     color = utils.hexToRGB(color);
     mask = utils.hexToRGB(mask);
     var r = Math.round(color.r * mask.r / 256);
@@ -145,7 +144,6 @@ var utils = {
     var b = Math.round(color.b * mask.b / 256);
 
     var result = 'rgb(' + r + ',' + g + ',' + b + ')';
-    console.log(result);
     return result;
   }
 };
@@ -822,7 +820,6 @@ var PlayModeViewModel = function(board) {
      * When mouse button is up, try to guess the type and highlight it.
      */
     $('body').on('mouseup', function(e) {
-      console.log('mouse is up');
       var shape = self.gestureDetector.endGesture();
       if (shape) {
         self.highlightUnit(shape, true);
@@ -873,7 +870,6 @@ var PuzzleListViewModel = function (board) {
   self.notify = true;
 
   self.updateBoard = function(newValue) {
-    console.log("updateboard");
     self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ""});
     if (self.notify) {
       window.HANGOUTAPI.submitDelta({mode: "List", puzzleID: ''+self.puzzleID()});
@@ -1064,8 +1060,6 @@ var SudokuGameViewModel = function() {
 
   self.strings = ko.observable(strings['en']);
 
-  console.log(self.strings());
-
   /*
    * Switch to given mode: first stop current mode, then start the new
    * mode.
@@ -1115,7 +1109,6 @@ var SudokuGameViewModel = function() {
    * set the game board, according to the shared state
    */
   self.catchUp = function(state) {
-    console.log(state);
     self.switchToMode(self.modes[state.mode], state, false);
   };
 
@@ -1216,23 +1209,19 @@ if (window.gapi && gapi.hangout) {
       },
       submitDelta: function(opt_updates, opt_removes) {
         hangout.data.submitDelta(opt_updates, opt_removes);
-        console.log(opt_updates);
       },
       sendMessage: function(message) {
         hangout.data.sendMessage(JSON.stringify(message));
-        console.log(message);
       }
     };
+
+    var locale = hangout.getLocalParticipantLocale();
+    sudoku.strings(strings[locale] || strings['en']);
 
     // catch up with the group:
     // get current user list and current state
     sudoku.users.localUser(hangout.getLocalParticipantId());
     sudoku.users.addUsers(hangout.getParticipants());
-
-    var locale = hangout.getLocalParticipantLocale();
-    console.log(locale);
-    sudoku.strings(strings[locale] || strings['en']);
-    console.log(sudoku.strings());
 
     var state = hangout.data.getState();
     if (state.mode) {
@@ -1280,7 +1269,6 @@ if (window.gapi && gapi.hangout) {
    *
    */
   hangout.data.onStateChanged.add(function(event) {
-    console.log(event);
     var changedKeys = event.addedKeys;
     var mode = event.state['mode'];
     var lastWriter;
@@ -1330,7 +1318,6 @@ if (window.gapi && gapi.hangout) {
           lastWriter = changedKeys[i].lastWriter;
           if (lastWriter == localUser) continue;
           if (cellName[0] != 'C') {
-            console.log("Unexpected key: ", cellName);
             continue;
           }
           var row = parseInt(cellName[1]);
