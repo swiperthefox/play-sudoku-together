@@ -1,4 +1,43 @@
 /*
+ * Overall structures (Models on the up uses/manages several instances of models on the bottom):
+ *
+ *
+ *                                      +------------------------------+----+
+ *                                      |                                   |
+ *                                      |  SudokuGameViewModel: switching   |
+ *                                      |  between the following three modes|
+ *                                      |                                   |
+ *                                      +----------------+------------------+-
+ *                             ----------/               |                    \------
+ *                 -----------/                          |                           \------
+ *      +---------/---------------+      +---------------+--------------+    +--------------\-----------+
+ *      |                         |      |                              |    |                          |
+ *      | PlayModeViewModel:      |      | GameEditorViewModel:         |    | PuzzleListViewModel:     |
+ *      |   play sudoku game      |      |   Edit new games by key in   |    |   Choose puzzle from a   |
+ *      |                         |      |   the numbers                |    |   list                   |
+ *      +--------+----------------+      +---------------+--------------+    +--------------------------+
+ *               |   \------                             |                           ----/
+ *               |          \-------                     |                      ----/
+ *               |                  \------              |                -----/
+ *               |                         \------       |           ----/
+ *      +--------+----------------+      +--------\------+----------/-----+--+
+ *      | UserList:               |      |                                   |
+ *      |   Manage the list of    |      | BoardViewModel:                   |
+ *      |   users                 |      |   Manage the state and appearance |
+ *      |                         |      |   of the board                    |
+ *      +-------------------------+      +---------------+-------------------+
+ *                                                       |A list of
+ *                                                       |CellState
+ *    +------------------------+         +---------------+-------------------+
+ *    |                        |         | CellStateViewMode:                |
+ *    |  Palette: colors used  |<--------+   Manage the state and appreance  |
+ *    |  by CellState          |         |   of one cell                     |
+ *    +------------------------+         +-----------------------------------+
+ *
+ *
+ *
+ */
+/*
  * Empty implementations of the google+ hangout data API
  */
 window.HANGOUTAPI = {
@@ -127,27 +166,10 @@ var UserList = function() {
     return self.userMap[uid].follow();
   };
 };
-var utils = {
-  hexToRGB: function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-  },
-  maskedColor: function(color, mask) {
-    color = utils.hexToRGB(color);
-    mask = utils.hexToRGB(mask);
-    var r = Math.round(color.r * mask.r / 256);
-    var g = Math.round(color.g * mask.g / 256);
-    var b = Math.round(color.b * mask.b / 256);
 
-    var result = 'rgb(' + r + ',' + g + ',' + b + ')';
-    return result;
-  }
-};
-
+/*
+ * Create normal color and dimmed color used for highlighting cells.
+ */
 var palette = {
   normalColor:  {
     'pointer': '#a0c5e8',
@@ -158,12 +180,31 @@ var palette = {
 };
 
 palette.dimmedColors = (function(mask) {
+  function hexToRGB(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+  function maskedColor(color, mask) {
+    color = hexToRGB(color);
+    mask = hexToRGB(mask);
+    var r = Math.round(color.r * mask.r / 256);
+    var g = Math.round(color.g * mask.g / 256);
+    var b = Math.round(color.b * mask.b / 256);
+
+    var result = 'rgb(' + r + ',' + g + ',' + b + ')';
+    return result;
+  }
+
   var nc = palette.normalColor;
   return {
-    'pointer': utils.maskedColor(nc['pointer'], mask),
-    'focused': utils.maskedColor(nc['focused'], mask),
-    'peerHLD': utils.maskedColor(nc['peerHLD'], mask),
-    'white': utils.maskedColor(nc['white'], mask)
+    'pointer': maskedColor(nc['pointer'], mask),
+    'focused': maskedColor(nc['focused'], mask),
+    'peerHLD': maskedColor(nc['peerHLD'], mask),
+    'white': maskedColor(nc['white'], mask)
     };
 })('#dddddd');
 
@@ -188,7 +229,7 @@ var CellState = function(i, j) {
   self.isNotMarker = ko.computed(function() {
     return self.values().length == 1;
   }, this);
-  self.key = 'C' + i + '#' + j;
+  self.key = 'C' + i + '#' + j;       // used to encode the game state
 
   // colors used for the background of different kind of cells
   self.colors = ko.computed(function() {
@@ -1269,6 +1310,7 @@ if (window.gapi && gapi.hangout) {
    ...
    c8#8: [9]
    puzzleID: 12  // used in 'list' mode
+   editorGameString: "120..." //used in "edit" mode
 }
    *
    */
