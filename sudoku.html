@@ -25,6 +25,7 @@
 
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
+    <script src="intro.js"></script>
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
     <!-- <link rel="stylesheet" href="bootstrap.min.css"> -->
     <!-- <link rel="stylesheet" href="bootstrap-theme.min.css"> -->
@@ -33,6 +34,7 @@
     <!-- <script src="knockout-3.1.0.js"></script> -->
     <!-- <link rel="stylesheet" href="stylesheet/normalize.css"> -->
     <!-- <script src="js/vendor/modernizr.js"></script> -->
+    <link href="introjs.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
   </head>
   <body onselectstart="return false;">
@@ -109,17 +111,17 @@
           </div>
 
           <div id="new-game-menu" class="btn-group dropup open">
-            <button type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" data-bind="text: $root.strings()['newGame']">
+            <button id="newgame" type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" data-bind="text: $root.strings()['newGame']">
               New Game <span class="caret"></span>
             </button>
             <ul class="dropdown-menu small-menu" role="menu" 
 		data-bind="foreach: $root.newGameMethods">
-              <li class="new-game"><span data-bind="text: $root.strings()[name]"></span></li>
+              <li class="new-game" data-bind="attr: {id: 'newgame-'+name}"><span data-bind="text: $root.strings()[name]"></span></li>
             </ul>
 
             <!-- reset game button, confirmation dialog -->
             <!-- Button trigger modal -->
-            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal" data-bind="text: $root.strings().restart">
+            <button class="btn btn-default btn-block" data-toggle="modal" data-target="#myModal" data-bind="text: $root.strings().restart, style: {'visibility': playing()?'':'hidden'}">
               Restart
             </button>
 
@@ -177,5 +179,9 @@
     <!-- <script src="main.js"></script> -->
     <script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>    
     <script src="sudoku.js"></script>
+    <script src="help.js"></script>
+    <script>
+      startIntro();
+    </script>
   </body>
 </html>

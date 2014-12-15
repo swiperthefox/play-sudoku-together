@@ -42,9 +42,9 @@
  */
 window.HANGOUTAPI = {
   clearValue: function(key){},
-  setValue: function(key, value){console.log("set value:", key + ':' + value);},
-  submitDelta: function(opt_updates, opt_removes){console.log("Delta:", opt_updates);},
-  sendMessage: function(message){console.log("message:", message);}
+  setValue: function(key, value) {},
+  submitDelta: function(opt_updates, opt_removes) {},
+  sendMessage: function(message) {}
 };
 
 var strings = {
@@ -96,7 +96,7 @@ var strings = {
  * owner: (SudokuGameViewModel.switchToMode) Operations to
  * create/choose new game can only performed by one player (called
  * owner) and others can only discuss with the owner. The first user
- * started such actions is the owner, and the owner is set to "" when
+ * started such actions is the owner, and the owner is set to '' when
  * the mode changed back to play.
  */
 
@@ -123,14 +123,14 @@ var UserList = function() {
   var self = this;
   self.userList = ko.observableArray();
   self.userMap = Object.create(null);
-  self.localUser = ko.observable("");
+  self.localUser = ko.observable('');
 
   self.addUser = function(id, name) {
     if (!self.userMap[id]) {
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
-    };
+    }
   };
 
   self.addUsers = function(ulist) {
@@ -140,7 +140,7 @@ var UserList = function() {
     }
   };
 
-  self.removeUser = function (id) {
+  self.removeUser = function(id) {
     delete self.userMap[id];
     var users = self.userList();
     for (var i=0; i<users.length; ++i) {
@@ -179,6 +179,9 @@ var palette = {
   }
 };
 
+/*
+ * Dimmed version of above colors
+ */
 palette.dimmedColors = (function(mask) {
   function hexToRGB(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -195,8 +198,7 @@ palette.dimmedColors = (function(mask) {
     var g = Math.round(color.g * mask.g / 256);
     var b = Math.round(color.b * mask.b / 256);
 
-    var result = 'rgb(' + r + ',' + g + ',' + b + ')';
-    return result;
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
 
   var nc = palette.normalColor;
@@ -209,7 +211,7 @@ palette.dimmedColors = (function(mask) {
 })('#dddddd');
 
 /*
- * Represents the infomation in one cell.
+ * Represents the information in one cell.
  */
 var CellState = function(i, j) {
   var self = this;
@@ -219,7 +221,7 @@ var CellState = function(i, j) {
   // assigned values
   self.values = ko.observableArray();
 
-  // bookkeeping variables for highlighting, currectness check
+  // bookkeeping variables for highlighting, correctness check
   self.isGiven = ko.observable(false);         // whether this cell is given at the start
   self.conflictCount = ko.observable(0);       // conflict with how many other cells
   self.peerHighlight = ko.observable(false);
@@ -233,7 +235,7 @@ var CellState = function(i, j) {
 
   // colors used for the background of different kind of cells
   self.colors = ko.computed(function() {
-    return self.isGiven()? palette.dimmedColors :palette.normalColor;
+    return self.isGiven() ? palette.dimmedColors : palette.normalColor;
   }, this);
 
   /*
@@ -259,9 +261,9 @@ var CellState = function(i, j) {
    * 3. conflict: red
    */
   self.color = ko.computed(function() {
-    return ((self.conflictCount() > 0 && "#ff0000") ||
-            (self.valueHighlight()    && "#0000ff") ||
-            (true                     && "#000000"));
+    return ((self.conflictCount() > 0 && '#ff0000') ||
+            (self.valueHighlight()    && '#0000ff') ||
+            (true                     && '#000000'));
   }, this);
 
   // border classes to draw wider borders for square units
@@ -270,11 +272,11 @@ var CellState = function(i, j) {
     var rightBorder = (j+1)%3==0;
     var topBorder = (i%3 == 0);
     var bottomBorder = ((i+1)%3==0);
-    var result = "cell";
-    if (leftBorder) result += " cell-left-border";
-    if (rightBorder) result += " cell-right-border";
-    if (bottomBorder) result += " cell-bottom-border";
-    if (topBorder) result += " cell-top-border";
+    var result = 'cell';
+    if (leftBorder) result += ' cell-left-border';
+    if (rightBorder) result += ' cell-right-border';
+    if (bottomBorder) result += ' cell-bottom-border';
+    if (topBorder) result += ' cell-top-border';
     return result;
   })();
 
@@ -307,7 +309,7 @@ var CellState = function(i, j) {
   };
 
   self.init = function(initValue, currentValues) {
-    var isGiven = initValue != undefined  && initValue >= '1' && initValue <= '9';
+    var isGiven = initValue != undefined && initValue >= '1' && initValue <= '9';
     var givenValue = isGiven?[initValue]:[];
     currentValues = currentValues || givenValue;
     self.setState(currentValues, isGiven);
@@ -327,14 +329,14 @@ var CellState = function(i, j) {
    * 3. Otherwise, add v to values.
    *
    * Since changing the value list of the cell may cause new
-   * conflictions with other cells, or some old conflictions may be
+   * conflicts with other cells, or some old conflicts may be
    * resolved, this function will return an object {value: v, delta:
-   * i}, where v is the value may involved in conflictions, and delta
-   * represents how conflictions will change (create new confliction
+   * i}, where v is the value may involved in conflicts, and delta
+   * represents how conflicts will change (create new conflict
    * or resolve old ones).
    *
    * Using the returned value, the caller can perform further checks
-   * for conflictions.
+   * for conflicts.
    */
   self.removeOrAddValue = function(v) {
     if (self.isGiven()) return null;
@@ -398,7 +400,7 @@ var BoardViewModel = function(row, col) {
   self.done.subscribe(function(value) {
     $(document).trigger('done', [value]);
   });
-  self.initGameString = "";
+  self.initGameString = '';
 
   /*
    * forAllCells: apply a function to all cells in the board.
@@ -419,7 +421,7 @@ var BoardViewModel = function(row, col) {
   /*
    * set game board state, given a string representation of a sudoku
    * game, optionally with an object whose keys in the form like
-   * "ci#j", where i, j are digits from 1 to 9, representing the
+   * 'ci#j', where i, j are digits from 1 to 9, representing the
    * current values filled in cell(i, j).
    */
   self.setBoardState = function(gameState) {
@@ -458,7 +460,7 @@ var BoardViewModel = function(row, col) {
       self.conflictCheck(i, j, conflictPotential);
     }
     if (self.cells[i][j].isNotMarker()) {
-      self.highlightByValue({value: self.cells[i][j].getValue()});
+      self.highlightByValue(self.cells[i][j].getValue());
     }
   };
 
@@ -482,27 +484,27 @@ var BoardViewModel = function(row, col) {
    * Test if two given cells are peers in rows, columns or squrares
    */
   self.isPeer = function(i1, j1, i2, j2) {
-    return  ((i1 != i2 || j1 != j2) && // not the same cell AND
-             (i1 == i2 || // same row OR
-              j1 == j2 || // same column OR
-              (Math.floor(i1/3)==Math.floor(i2/3) &&
-               Math.floor(j1/3)==Math.floor(j2/3))));  // same square
+    return ((i1 != i2 || j1 != j2) && // not the same cell AND
+            (i1 == i2 || // same row OR
+             j1 == j2 || // same column OR
+             (Math.floor(i1/3)==Math.floor(i2/3) &&
+              Math.floor(j1/3)==Math.floor(j2/3))));  // same square
   };
 
   /*
-   * Check confliction between cell(row, col) and all other cells,
+   * Check conflict between cell(row, col) and all other cells,
    * assuming cell(row, col) has value v.
    *
    * If any other cell also has the value v, increase that cell's
    * conflictCount by delta. (delta may be -1, which means an
-   * confliction caused by v is resolved).
+   * conflict caused by v is resolved).
    */
-  self.conflictCheck = function(row, col, conflict) {
-    var newValue = conflict['new'];
-    var oldValue = conflict['old'];
+  self.conflictCheck = function(row, col, newChange) {
+    var newValue = newChange['new'];
+    var oldValue = newChange['old'];
 
     var filled = 0;
-    var confict = 0;
+    var conflict = 0;
     var currentCell = self.cells[row][col];
     self.forAllCells(function updateConfliction(i, j, cell) {
       filled += cell.isNotMarker()?1:0;
@@ -521,9 +523,9 @@ var BoardViewModel = function(row, col) {
         cell.conflictCount(cell.conflictCount()+delta);
         currentCell.conflictCount(currentCell.conflictCount()+delta);
       }
-      confict += cell.conflictCount();
+      conflict += cell.conflictCount();
     }, false);
-    self.done(filled == 81 && confict == 0);
+    self.done(filled == 81 && conflict == 0);
   };
 
   self.withOthers = true;
@@ -538,6 +540,7 @@ var BoardViewModel = function(row, col) {
    * parameter, and return a boolean.
    */
   self.highlightCells = function(f, withOthers) {
+    self.focusedCell = null;
     var missing = [true, true, true, true, true, true, true, true, true];
     self.forAllCells(function(i, j, cell) {
       cell.isFocused(false);
@@ -551,7 +554,7 @@ var BoardViewModel = function(row, col) {
         // highlights agree to coexist with others.
         if (!(self.withOthers && withOthers)) {
           cell.peerHighlight(false);
-        };
+        }
       }
     });
     self.withOthers = withOthers;
@@ -564,19 +567,19 @@ var BoardViewModel = function(row, col) {
    * cells.
    */
   self.highlightRow = function(row) {
-    return self.highlightCells(function(i, j) {return i==row;}, true);
+    return self.highlightCells(function sameRow(i, j) {return i==row;}, true);
   };
 
   self.highlightCol = function(col) {
-    return self.highlightCells(function(i, j) {return j==col;}, true);
+    return self.highlightCells(function sameCol(i, j) {return j==col;}, true);
   };
 
   self.highlightSquare = function(row, col) {
-    return self.highlightCells(function(i, j) {
+    return self.highlightCells(function sameSquare(i, j) {
       return Math.floor(j/3)==col && Math.floor(i/3)==row;
     }, false);
   };
-
+self.focusedCell = null;
   self.selectCell = function(row, col) {
     var missing = self.highlightCells(function(i, j) {
       return self.isPeer(i, j, row, col);
@@ -586,6 +589,7 @@ var BoardViewModel = function(row, col) {
     if (self.cells[row][col].isGiven()) {
       missing = [];
     }
+    self.focusedCell = self.cells[row][col];
     return missing;
   };
 
@@ -593,7 +597,7 @@ var BoardViewModel = function(row, col) {
    * Highlight all cells that is assigned value v.
    */
   self.highlightByValue = function(v) {
-    self.forAllCells(function(i, j, cell) {
+    self.forAllCells(function hasValue(i, j, cell) {
       var highlight = cell.isNotMarker() && cell.getValue() == v;
       cell.valueHighlight(highlight);
     });
@@ -602,15 +606,15 @@ var BoardViewModel = function(row, col) {
 
   /*
    * Highlight cells, accepts an object that has the following format:
-   * { shape: "row", // can be "row", "col", "square", "cell", "value"
+   * { type: 'row', // can be 'row', 'col', 'square', 'cell', 'value'
    *   row: 4,
    *   col: 5,
-   *   value: 4     // only used when shape is "value"
+   *   value: 4     // only used when type is 'value'
    * }
    */
   self.highlightUnit = function(unit) {
     var missing;
-    switch (unit.shape) {
+    switch (unit.type) {
     case 'row':
       missing = self.highlightRow(unit.row);
       break;
@@ -649,13 +653,13 @@ var BoardViewModel = function(row, col) {
    */
   self.removeHighlights = function() {
     self.highlightCells(function(i,j) {return false;}, false);
-    self.highlightByValue({value: null});
+    self.highlightByValue(null);
     if (self.previousPointerRow != undefined) {
       self.cells[self.previousPointerRow][self.previousPointerCol].pointerHighlight(false);
       self.previousPointerCol = undefined;
       self.previousPointerRow = undefined;
     }
-    self.withOthes = true;
+    self.withOthers = true;
     return null;
   };
 
@@ -766,7 +770,7 @@ var PlayModeViewModel = function(board) {
    */
   self.submitStatus = function() {
     var snapshot = self.board.getSnapshot();
-    snapshot.mode = "Play";
+    snapshot.mode = 'Play';
     HANGOUTAPI.submitDelta(snapshot);
   };
 
@@ -817,7 +821,7 @@ var PlayModeViewModel = function(board) {
      */
     $('#game-pane').on('click', '.cell', function() {
       var data = ko.dataFor(this);
-      self.highlightUnit({shape: 'cell', row: data.i, col: data.j}, true);
+      self.highlightUnit({type: 'cell', row: data.i, col: data.j}, true);
     });
 
     /*
@@ -833,11 +837,11 @@ var PlayModeViewModel = function(board) {
 
     $('#game-pane').on('click', 'td.top-cell', function() {
       var context = ko.contextFor(this);
-      self.highlightUnit({shape: 'col', col: context.$index()}, true);
+      self.highlightUnit({type: 'col', col: context.$index()}, true);
     });
     $('#game-pane').on('click', 'td.side-cell', function() {
       var context = ko.contextFor(this);
-      self.highlightUnit({shape: 'row', row: context.$index()}, true);
+      self.highlightUnit({type: 'row', row: context.$index()}, true);
     });
 
     /*
@@ -861,9 +865,9 @@ var PlayModeViewModel = function(board) {
      * When mouse button is up, try to guess the type and highlight it.
      */
     $('body').on('mouseup', function(e) {
-      var shape = self.gestureDetector.endGesture();
-      if (shape) {
-        self.highlightUnit(shape, true);
+      var type = self.gestureDetector.endGesture();
+      if (type) {
+        self.highlightUnit(type, true);
       }
     });
     /*
@@ -872,7 +876,13 @@ var PlayModeViewModel = function(board) {
     $('.digit-button').on('click', function(e) {
       var target = e.target;
       var data = ko.dataFor(target);
-      self.highlightUnit({value: data.value, shape: 'value'}, true);
+      if (self.board.focusedCell) {
+        var i = self.board.focusedCell.i;
+        var j = self.board.focusedCell.j;
+        self.board.removeOrAddValue(i, j, data.value);
+      } else {
+        self.highlightUnit({value: data.value, type: 'value'}, true);
+      }
     });
     /*
      * clicking outside the game pane will remove all highlights
@@ -881,7 +891,7 @@ var PlayModeViewModel = function(board) {
       var target = e.target;
       var s = $(target).parents('table').size();
       if ( s == 0) {
-        self.highlightUnit({shape: "null"}, true);
+        self.highlightUnit({type: 'null'}, true);
       }
     });
   };
@@ -903,17 +913,17 @@ var PlayModeViewModel = function(board) {
  *
  * The two ways are implemented in two ViewModels.
  */
-var PuzzleListViewModel = function (board) {
+var PuzzleListViewModel = function(board) {
   var self = this;
-  self.name = "List";
+  self.name = 'List';
   self.board = board;
   self.puzzleID = ko.observable(1);
   self.notify = true;
 
   self.updateBoard = function(newValue) {
-    self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ""});
+    self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ''});
     if (self.notify) {
-      window.HANGOUTAPI.submitDelta({mode: "List", puzzleID: ''+self.puzzleID()});
+      window.HANGOUTAPI.submitDelta({mode: 'List', puzzleID: ''+self.puzzleID()});
     }
   };
 
@@ -939,74 +949,70 @@ var PuzzleListViewModel = function (board) {
     self.puzzleList.push.apply(puzzles);
   };
 
-
   self.getGame = function() {
     return self.puzzleList[self.puzzleID()-1];
   };
-  self.puzzleList = ["003020600900305001001806400008102900700000008006708200002609500800203009005010300",
-                     "200080300060070084030500209000105408000000000402706000301007040720040060004010003",
-                     "000000907000420180000705026100904000050000040000507009920108000034059000507000000",
-                     "030050040008010500460000012070502080000603000040109030250000098001020600080060020",
-                     "020810740700003100090002805009040087400208003160030200302700060005600008076051090",
-                     "100920000524010000000000070050008102000000000402700090060000000000030945000071006",
-                     "043080250600000000000001094900004070000608000010200003820500000000000005034090710",
-                     "480006902002008001900370060840010200003704100001060049020085007700900600609200018",
-                     "000900002050123400030000160908000000070000090000000205091000050007439020400007000",
-                     "001900003900700160030005007050000009004302600200000070600100030042007006500006800",
-                     "000125400008400000420800000030000095060902010510000060000003049000007200001298000",
-                     "062340750100005600570000040000094800400000006005830000030000091006400007059083260",
-                     "300000000005009000200504000020000700160000058704310600000890100000067080000005437",
-                     "630000000000500008005674000000020000003401020000000345000007004080300902947100080",
-                     "000020040008035000000070602031046970200000000000501203049000730000000010800004000",
-                     "361025900080960010400000057008000471000603000259000800740000005020018060005470329",
-                     "050807020600010090702540006070020301504000908103080070900076205060090003080103040",
-                     "080005000000003457000070809060400903007010500408007020901020000842300000000100080",
-                     "003502900000040000106000305900251008070408030800763001308000104000020000005104800",
-                     "000000000009805100051907420290401065000000000140508093026709580005103600000000000",
-                     "020030090000907000900208005004806500607000208003102900800605007000309000030020050",
-                     "005000006070009020000500107804150000000803000000092805907006000030400010200000600",
-                     "040000050001943600009000300600050002103000506800020007005000200002436700030000040",
-                     "004000000000030002390700080400009001209801307600200008010008053900040000000000800",
-                     "360020089000361000000000000803000602400603007607000108000000000000418000970030014",
-                     "500400060009000800640020000000001008208000501700500000000090084003000600060003002",
-                     "007256400400000005010030060000508000008060200000107000030070090200000004006312700",
-                     "000000000079050180800000007007306800450708096003502700700000005016030420000000000",
-                     "030000080009000500007509200700105008020090030900402001004207100002000800070000090",
-                     "200170603050000100000006079000040700000801000009050000310400000005000060906037002",
-                     "000000080800701040040020030374000900000030000005000321010060050050802006080000000",
-                     "000000085000210009960080100500800016000000000890006007009070052300054000480000000",
-                     "608070502050608070002000300500090006040302050800050003005000200010704090409060701",
-                     "050010040107000602000905000208030501040070020901080406000401000304000709020060010",
-                     "053000790009753400100000002090080010000907000080030070500000003007641200061000940",
-                     "006080300049070250000405000600317004007000800100826009000702000075040190003090600",
-                     "005080700700204005320000084060105040008000500070803010450000091600508007003010600",
-                     "000900800128006400070800060800430007500000009600079008090004010003600284001007000",
-                     "000080000270000054095000810009806400020403060006905100017000620460000038000090000",
-                     "000602000400050001085010620038206710000000000019407350026040530900020007000809000",
-                     "000900002050123400030000160908000000070000090000000205091000050007439020400007000",
-                     "380000000000400785009020300060090000800302009000040070001070500495006000000000092",
-                     "000158000002060800030000040027030510000000000046080790050000080004070100000325000",
-                     "010500200900001000002008030500030007008000500600080004040100700000700006003004050",
-                     "080000040000469000400000007005904600070608030008502100900000005000781000060000010",
-                     "904200007010000000000706500000800090020904060040002000001607000000000030300005702",
-                     "000700800006000031040002000024070000010030080000060290000800070860000500002006000",
-                     "001007090590080001030000080000005800050060020004100000080000030100020079020700400",
-                     "000003017015009008060000000100007000009000200000500004000000020500600340340200000",
-                     "300200000000107000706030500070009080900020004010800050009040301000702000000008006",
-                     ".58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5...."];
-
+  self.puzzleList = ['003020600900305001001806400008102900700000008006708200002609500800203009005010300',
+                     '200080300060070084030500209000105408000000000402706000301007040720040060004010003',
+                     '000000907000420180000705026100904000050000040000507009920108000034059000507000000',
+                     '030050040008010500460000012070502080000603000040109030250000098001020600080060020',
+                     '020810740700003100090002805009040087400208003160030200302700060005600008076051090',
+                     '100920000524010000000000070050008102000000000402700090060000000000030945000071006',
+                     '043080250600000000000001094900004070000608000010200003820500000000000005034090710',
+                     '480006902002008001900370060840010200003704100001060049020085007700900600609200018',
+                     '000900002050123400030000160908000000070000090000000205091000050007439020400007000',
+                     '001900003900700160030005007050000009004302600200000070600100030042007006500006800',
+                     '000125400008400000420800000030000095060902010510000060000003049000007200001298000',
+                     '062340750100005600570000040000094800400000006005830000030000091006400007059083260',
+                     '300000000005009000200504000020000700160000058704310600000890100000067080000005437',
+                     '630000000000500008005674000000020000003401020000000345000007004080300902947100080',
+                     '000020040008035000000070602031046970200000000000501203049000730000000010800004000',
+                     '361025900080960010400000057008000471000603000259000800740000005020018060005470329',
+                     '050807020600010090702540006070020301504000908103080070900076205060090003080103040',
+                     '080005000000003457000070809060400903007010500408007020901020000842300000000100080',
+                     '003502900000040000106000305900251008070408030800763001308000104000020000005104800',
+                     '000000000009805100051907420290401065000000000140508093026709580005103600000000000',
+                     '020030090000907000900208005004806500607000208003102900800605007000309000030020050',
+                     '005000006070009020000500107804150000000803000000092805907006000030400010200000600',
+                     '040000050001943600009000300600050002103000506800020007005000200002436700030000040',
+                     '004000000000030002390700080400009001209801307600200008010008053900040000000000800',
+                     '360020089000361000000000000803000602400603007607000108000000000000418000970030014',
+                     '500400060009000800640020000000001008208000501700500000000090084003000600060003002',
+                     '007256400400000005010030060000508000008060200000107000030070090200000004006312700',
+                     '000000000079050180800000007007306800450708096003502700700000005016030420000000000',
+                     '030000080009000500007509200700105008020090030900402001004207100002000800070000090',
+                     '200170603050000100000006079000040700000801000009050000310400000005000060906037002',
+                     '000000080800701040040020030374000900000030000005000321010060050050802006080000000',
+                     '000000085000210009960080100500800016000000000890006007009070052300054000480000000',
+                     '608070502050608070002000300500090006040302050800050003005000200010704090409060701',
+                     '050010040107000602000905000208030501040070020901080406000401000304000709020060010',
+                     '053000790009753400100000002090080010000907000080030070500000003007641200061000940',
+                     '006080300049070250000405000600317004007000800100826009000702000075040190003090600',
+                     '005080700700204005320000084060105040008000500070803010450000091600508007003010600',
+                     '000900800128006400070800060800430007500000009600079008090004010003600284001007000',
+                     '000080000270000054095000810009806400020403060006905100017000620460000038000090000',
+                     '000602000400050001085010620038206710000000000019407350026040530900020007000809000',
+                     '000900002050123400030000160908000000070000090000000205091000050007439020400007000',
+                     '380000000000400785009020300060090000800302009000040070001070500495006000000000092',
+                     '000158000002060800030000040027030510000000000046080790050000080004070100000325000',
+                     '010500200900001000002008030500030007008000500600080004040100700000700006003004050',
+                     '080000040000469000400000007005904600070608030008502100900000005000781000060000010',
+                     '904200007010000000000706500000800090020904060040002000001607000000000030300005702',
+                     '000700800006000031040002000024070000010030080000060290000800070860000500002006000',
+                     '001007090590080001030000080000005800050060020004100000080000030100020079020700400',
+                     '000003017015009008060000000100007000009000200000500004000000020500600340340200000',
+                     '300200000000107000706030500070009080900020004010800050009040301000702000000008006',
+                     '.58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5....'];
 };
-
-
 
 var GameEditorViewModel = function(board) {
   var self = this;
-  var emptyGame =   ".........\n.........\n.........\n.........\n.........\n"
-        + ".........\n.........\n.........\n.........";
+  var emptyGame = ('.........\n.........\n.........\n.........\n.........\n' +
+                   '.........\n.........\n.........\n.........');
   self.board = board;
-  self.editedGameString = ko.observable("");
+  self.editedGameString = ko.observable('');
   self.updateCells = true;
-  self.name = "Edit";
+  self.name = 'Edit';
   self.editing = false;
 
   function normalizeGameString(gameString) {
@@ -1024,7 +1030,7 @@ var GameEditorViewModel = function(board) {
       self.board.setBoardState({gameString: gameString});
     }
     if (self.notify) {
-      HANGOUTAPI.submitDelta({editorGameString: gameString, mode: "Edit"});
+      HANGOUTAPI.submitDelta({editorGameString: gameString, mode: 'Edit'});
     }
   };
 
@@ -1068,7 +1074,7 @@ var GameEditorViewModel = function(board) {
    */
   self.stop = function() {
     $('#game-pane').off();
-    self.editedGameString("");
+    self.editedGameString('');
     self.editing = false;
   };
 
@@ -1144,7 +1150,7 @@ var SudokuGameViewModel = function() {
 
   $(document).on('done', function(e, p) {
     if (p) {
-      alert("完成了, 祝贺你.");
+      alert('完成了, 祝贺你.');
     }
     return false;
   });
@@ -1183,12 +1189,12 @@ var SelectionGesture = function() {
    * Take an array of cells the gesture has passed, guess the user's
    * intention, there should be at least two cells in the array:
    *
-   * 1. If all cells are in the same row, return {shape: 'row', row: row}
+   * 1. If all cells are in the same row, return {type: 'row', row: row}
 
-   * 2. If all cells are in the same column, return {shape: 'column', col:
+   * 2. If all cells are in the same column, return {type: 'column', col:
    * col}
 
-   * 3. Otherwise, if all cells are in the * square, return {shape:
+   * 3. Otherwise, if all cells are in the * square, return {type:
    * 'square',row: r, col: c}.
 
    * 4. Otherwise, return null;
@@ -1211,11 +1217,11 @@ var SelectionGesture = function() {
                               currentSquare.col == Math.floor(cell.j/3));
     }
     if (isRow) {
-      return {shape: 'row', row: currentRow};
+      return {type: 'row', row: currentRow};
     } else if (isCol) {
-      return {shape: 'col', col: currentCol};
+      return {type: 'col', col: currentCol};
     } else if (isSquare) {
-      return {shape: 'square', row: currentSquare.row, col: currentSquare.col};
+      return {type: 'square', row: currentSquare.row, col: currentSquare.col};
     } else {
       return null;
     }
@@ -1242,7 +1248,7 @@ var SelectionGesture = function() {
 
 var sudoku = new SudokuGameViewModel();
 
-if (window.gapi && gapi.hangout) {
+if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
   var hangout = gapi.hangout;
   hangout.onApiReady.add(function() {
     // redefine the HANGOUTAPI functions, using real hangout api
@@ -1286,8 +1292,8 @@ if (window.gapi && gapi.hangout) {
      * Handle received messages. There is only one kind of messages:
      * Highlighting commands.
      *
-     * {shape: 'row', row: 1, col: 1},
-     *     where shape can be 'row', 'col', 'cell', 'square', 'value'
+     * {type: 'row', row: 1, col: 1},
+     *     where type can be 'row', 'col', 'cell', 'square', 'value'
      */
     hangout.data.onMessageReceived.add(function(event) {
       var sender = event.senderId;
@@ -1310,7 +1316,7 @@ if (window.gapi && gapi.hangout) {
      ...
      c8#8: [9]
      puzzleID: 12  // used in 'list' mode
-     editorGameString: "120..." //used in "edit" mode
+     editorGameString: '120...' //used in 'edit' mode
      }
      *
      */
@@ -1377,6 +1383,5 @@ if (window.gapi && gapi.hangout) {
   });
 }
 
-
 ko.applyBindings(sudoku);
-sudoku.board.setBoardState({gameString: ".58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5...."});
+sudoku.board.setBoardState({gameString: '.58...41.7..4.5..32...1...99...4...2.7.....3..6.....5...1...8.....2.7.......5....'});
