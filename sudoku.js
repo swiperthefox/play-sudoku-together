@@ -108,10 +108,10 @@ var strings = {
  */
 var User = function(id, name, follow) {
   var self = this;
-  self.name = name;
-  self.id = id;
-  self.follow = ko.observable(follow);
-  self.toggleState = function() {
+  this.name = name;
+  this.id = id;
+  this.follow = ko.observable(follow);
+  this.toggleState = function() {
     self.follow(!self.follow());
   };
 };
@@ -121,11 +121,11 @@ var User = function(id, name, follow) {
  */
 var UserList = function() {
   var self = this;
-  self.userList = ko.observableArray();
-  self.userMap = Object.create(null);
-  self.localUser = ko.observable('');
+  this.userList = ko.observableArray();
+  this.userMap = Object.create(null);
+  this.localUser = ko.observable('');
 
-  self.addUser = function(id, name) {
+  this.addUser = function(id, name) {
     if (!self.userMap[id]) {
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
@@ -133,14 +133,14 @@ var UserList = function() {
     }
   };
 
-  self.addUsers = function(ulist) {
+  this.addUsers = function(ulist) {
     for (var i=0; i<ulist.length; ++i) {
       var user = ulist[i];
       self.addUser(user.id, user.person.displayName);
     }
   };
 
-  self.removeUser = function(id) {
+  this.removeUser = function(id) {
     delete self.userMap[id];
     var users = self.userList();
     for (var i=0; i<users.length; ++i) {
@@ -152,17 +152,17 @@ var UserList = function() {
     }
   };
 
-  self.removeUsers = function(ulist) {
+  this.removeUsers = function(ulist) {
     for (var i=0; i<ulist.length; ++i) {
       self.removeUser(ulist[i].id);
     }
   };
 
-  self.toggleState = function(uid) {
+  this.toggleState = function(uid) {
     self.userMap[uid].toggleState();
   };
 
-  self.enabled = function(uid) {
+  this.enabled = function(uid) {
     return self.userMap[uid].follow();
   };
 };
@@ -216,25 +216,28 @@ palette.dimmedColors = (function(mask) {
 var CellState = function(i, j) {
   var self = this;
   // position
-  self.i = i;
-  self.j = j;
+  this.i = i;
+  this.j = j;
   // assigned values
-  self.values = ko.observableArray();
+  this.values = ko.observableArray();
+
+  // who has the right to change it
+  this.owner = "";
 
   // bookkeeping variables for highlighting, correctness check
-  self.isGiven = ko.observable(false);         // whether this cell is given at the start
-  self.conflictCount = ko.observable(0);       // conflict with how many other cells
-  self.peerHighlight = ko.observable(false);
-  self.isFocused = ko.observable(false);       // is it the cell that accepting input
-  self.valueHighlight = ko.observable(false);
-  self.pointerHighlight = ko.observable(false);
-  self.isNotMarker = ko.computed(function() {
+  this.isGiven = ko.observable(false);         // whether this cell is given at the start
+  this.conflictCount = ko.observable(0);       // conflict with how many other cells
+  this.peerHighlight = ko.observable(false);
+  this.isFocused = ko.observable(false);       // is it the cell that accepting input
+  this.valueHighlight = ko.observable(false);
+  this.pointerHighlight = ko.observable(false);
+  this.isNotMarker = ko.computed(function() {
     return self.values().length == 1;
   }, this);
-  self.key = 'C' + i + '#' + j;       // used to encode the game state
+  this.key = 'C' + i + '#' + j;       // used to encode the game state
 
   // colors used for the background of different kind of cells
-  self.colors = ko.computed(function() {
+  this.colors = ko.computed(function() {
     return self.isGiven() ? palette.dimmedColors : palette.normalColor;
   }, this);
 
@@ -246,7 +249,7 @@ var CellState = function(i, j) {
    * 4. focused cell: input will go into this cell
    * 5. pointer: mouse is pointing to this cell
    */
-  self.background = ko.computed(function() {
+  this.background = ko.computed(function() {
     var colors = self.colors();
     return ((self.pointerHighlight() && colors['pointer']) ||
             (self.isFocused()        && colors['focused']) ||
@@ -260,14 +263,14 @@ var CellState = function(i, j) {
    * 2. highlighted value
    * 3. conflict: red
    */
-  self.color = ko.computed(function() {
+  this.color = ko.computed(function() {
     return ((self.conflictCount() > 0 && '#ff0000') ||
             (self.valueHighlight()    && '#0000ff') ||
             (true                     && '#000000'));
   }, this);
 
   // border classes to draw wider borders for square units
-  self.borderClass = (function() {
+  this.borderClass = (function() {
     var leftBorder = (j%3 == 0);
     var rightBorder = (j+1)%3==0;
     var topBorder = (i%3 == 0);
@@ -285,12 +288,12 @@ var CellState = function(i, j) {
    * stringValue: combine the values into a single string,
    * to be shown in the cell.
    */
-  self.stringValue = ko.computed(function() {
+  this.stringValue = ko.computed(function() {
     return self.values().join(' ');
   });
 
 
-  self.setValue = function(values) {
+  this.setValue = function(values) {
     self.values.removeAll();
     self.values.push.apply(self.values, values);
   };
@@ -299,7 +302,7 @@ var CellState = function(i, j) {
    *
    * values is an array of values, and isGiven is a bool.
    */
-  self.setState = function(values, isGiven) {
+  this.setState = function(values, isGiven) {
     self.setValue(values);
     self.isGiven(isGiven);
     self.conflictCount(0);
@@ -308,7 +311,7 @@ var CellState = function(i, j) {
     self.valueHighlight(false);
   };
 
-  self.init = function(initValue, currentValues) {
+  this.init = function(initValue, currentValues) {
     var isGiven = initValue != undefined && initValue >= '1' && initValue <= '9';
     var givenValue = isGiven?[initValue]:[];
     currentValues = currentValues || givenValue;
@@ -318,7 +321,7 @@ var CellState = function(i, j) {
   /*
    * Get the first value from the value list.
    */
-  self.getValue = function() {
+  this.getValue = function() {
     return self.values()[0];
   };
 
@@ -338,7 +341,7 @@ var CellState = function(i, j) {
    * Using the returned value, the caller can perform further checks
    * for conflicts.
    */
-  self.removeOrAddValue = function(v) {
+  this.removeOrAddValue = function(v) {
     if (self.isGiven()) return null;
     var result = null;
     if (v == '0') {
@@ -360,7 +363,7 @@ var CellState = function(i, j) {
     return result;
   };
 
-  self.updateValue = function(values) {
+  this.updateValue = function(values) {
     var conflictPotential = {};
     if (values.length == 1) {
       conflictPotential['new'] = values[0];
@@ -381,10 +384,10 @@ var BoardViewModel = function(row, col) {
   var self = this;
 
   // board dimensions
-  self.row = row;
-  self.col = col;
+  this.row = row;
+  this.col = col;
   // row x col CellState objects in an rowxcol grid
-  self.cells = (function() {
+  this.cells = (function() {
     var result = [];
     for (var i=0; i<row; i++) {
       var newRow = [];
@@ -396,18 +399,18 @@ var BoardViewModel = function(row, col) {
     return result;
   })();
 
-  self.done = ko.observable(false);
-  self.done.subscribe(function(value) {
+  this.done = ko.observable(false);
+  this.done.subscribe(function(value) {
     $(document).trigger('done', [value]);
   });
-  self.initGameString = '';
+  this.initGameString = '';
 
   /*
    * forAllCells: apply a function to all cells in the board.
    *
    * f is a function that accepts (i, j, cell).
    */
-  self.forAllCells = function(f) {
+  this.forAllCells = function(f) {
     var rowCount = self.cells.length;
     for (var i=0; i<rowCount; ++i) {
       var row = self.cells[i];
@@ -424,7 +427,7 @@ var BoardViewModel = function(row, col) {
    * 'ci#j', where i, j are digits from 1 to 9, representing the
    * current values filled in cell(i, j).
    */
-  self.setBoardState = function(gameState) {
+  this.setBoardState = function(gameState) {
     var gameString = gameState['gameString'];
     self.initGameString = gameString;
     gameState = gameState || {};
@@ -436,12 +439,12 @@ var BoardViewModel = function(row, col) {
     });
   };
 
-  self.reset = function() {
+  this.reset = function() {
     self.setBoardState({gameString: self.initGameString});
 
   };
 
-  self.gameStringFromCells = function() {
+  this.gameStringFromCells = function() {
     var result = [];
     self.forAllCells(function(i, j, cell) {
       result.push(cell.getValue() || '.');
@@ -455,7 +458,7 @@ var BoardViewModel = function(row, col) {
   /*
    * Actions after changing a cell's value
    */
-  self.afterChangeCell = function(i, j, conflictPotential) {
+  this.afterChangeCell = function(i, j, conflictPotential) {
     if (conflictPotential != null) {
       self.conflictCheck(i, j, conflictPotential);
     }
@@ -468,22 +471,22 @@ var BoardViewModel = function(row, col) {
    * Add a value v to a given cell(i, j). If this may cause the number
    * of confliction change, check the conflicts again.
    */
-  self.removeOrAddValue = function(i, j, v) {
-    var conflictPotential = self.cells[i][j].removeOrAddValue(v);
+  this.removeOrAddValue = function(i, j, v) {
+    var conflictPotential = this.cells[i][j].removeOrAddValue(v);
     self.afterChangeCell(i, j, conflictPotential);
   };
 
   /*
    * Set the value of given cell
    */
-  self.updateCell = function(i, j, values) {
+  this.updateCell = function(i, j, values) {
     var conflictPotential = self.cells[i][j].updateValue(values);
     self.afterChangeCell(i, j, conflictPotential);
   };
   /*
    * Test if two given cells are peers in rows, columns or squrares
    */
-  self.isPeer = function(i1, j1, i2, j2) {
+  this.isPeer = function(i1, j1, i2, j2) {
     return ((i1 != i2 || j1 != j2) && // not the same cell AND
             (i1 == i2 || // same row OR
              j1 == j2 || // same column OR
@@ -499,7 +502,7 @@ var BoardViewModel = function(row, col) {
    * conflictCount by delta. (delta may be -1, which means an
    * conflict caused by v is resolved).
    */
-  self.conflictCheck = function(row, col, newChange) {
+  this.conflictCheck = function(row, col, newChange) {
     var newValue = newChange['new'];
     var oldValue = newChange['old'];
 
@@ -528,7 +531,7 @@ var BoardViewModel = function(row, col) {
     self.done(filled == 81 && conflict == 0);
   };
 
-  self.withOthers = true;
+  this.withOthers = true;
   /*
    * Highlight all cells that satisfies a given condition f, if
    * withOthers is true, this highlight can coexist with other
@@ -539,7 +542,7 @@ var BoardViewModel = function(row, col) {
    * f is a function that takes the cells position (row, col) as
    * parameter, and return a boolean.
    */
-  self.highlightCells = function(f, withOthers) {
+  this.highlightCells = function(f, withOthers) {
     self.focusedCell = null;
     var missing = [true, true, true, true, true, true, true, true, true];
     self.forAllCells(function(i, j, cell) {
@@ -566,21 +569,21 @@ var BoardViewModel = function(row, col) {
    * flag array, indicating which number is missing in the highlighted
    * cells.
    */
-  self.highlightRow = function(row) {
+  this.highlightRow = function(row) {
     return self.highlightCells(function sameRow(i, j) {return i==row;}, true);
   };
 
-  self.highlightCol = function(col) {
+  this.highlightCol = function(col) {
     return self.highlightCells(function sameCol(i, j) {return j==col;}, true);
   };
 
-  self.highlightSquare = function(row, col) {
+  this.highlightSquare = function(row, col) {
     return self.highlightCells(function sameSquare(i, j) {
       return Math.floor(j/3)==col && Math.floor(i/3)==row;
     }, false);
   };
-self.focusedCell = null;
-  self.selectCell = function(row, col) {
+this.focusedCell = null;
+  this.selectCell = function(row, col) {
     var missing = self.highlightCells(function(i, j) {
       return self.isPeer(i, j, row, col);
     }, false);
@@ -596,7 +599,7 @@ self.focusedCell = null;
   /*
    * Highlight all cells that is assigned value v.
    */
-  self.highlightByValue = function(v) {
+  this.highlightByValue = function(v) {
     self.forAllCells(function hasValue(i, j, cell) {
       var highlight = cell.isNotMarker() && cell.getValue() == v;
       cell.valueHighlight(highlight);
@@ -612,7 +615,7 @@ self.focusedCell = null;
    *   value: 4     // only used when type is 'value'
    * }
    */
-  self.highlightUnit = function(unit) {
+  this.highlightUnit = function(unit) {
     var missing;
     switch (unit.type) {
     case 'row':
@@ -640,7 +643,7 @@ self.focusedCell = null;
   /*
    * set a cell to pointer
    */
-  self.setPointer = function(row, col) {
+  this.setPointer = function(row, col) {
     if (self.previousPointerRow != undefined) {
       self.cells[self.previousPointerRow][self.previousPointerCol].pointerHighlight(false);
     }
@@ -651,7 +654,7 @@ self.focusedCell = null;
   /*
    * Remove all highlights
    */
-  self.removeHighlights = function() {
+  this.removeHighlights = function() {
     self.highlightCells(function(i,j) {return false;}, false);
     self.highlightByValue(null);
     if (self.previousPointerRow != undefined) {
@@ -666,7 +669,7 @@ self.focusedCell = null;
   /*
    * Get a sanpshot of current board state
    */
-  self.getSnapshot = function() {
+  this.getSnapshot = function() {
     var result = {gameString: self.initGameString};
     self.forAllCells(function(i, j, cell) {
       result[cell.key] = JSON.stringify(cell.values().slice(0));
@@ -704,18 +707,18 @@ self.focusedCell = null;
 var PlayModeViewModel = function(board) {
   var self = this;
   self.name = 'Play';
-  self.board = board;
+  this.board = board;
 
   // to be able to save/restore game
-  self.oldGameState = {};
-  self.oldStatus = false;
+  this.oldGameState = {};
+  this.oldStatus = false;
 
   // whether the play controls are activated
-  self.playing = ko.observable(false);
+  this.playing = ko.observable(false);
 
   // 9 buttons showing 1-9, used to show missing numbers in a selected
   // set of cells, or choose which number to highligh.
-  self.controlButtons = (function() {
+  this.controlButtons = (function() {
     var result = [];
     for (var i=0; i<9; i++) {
       result.push({value: i+1,
@@ -727,7 +730,7 @@ var PlayModeViewModel = function(board) {
   /*
    * Highlight missing numbers
    */
-  self.highlightMissing = function(missing) {
+  this.highlightMissing = function(missing) {
     // set all buttons unhighlighted
     for (var i=0; i<9; i++)
       self.controlButtons[i].enabled(false);
@@ -744,7 +747,7 @@ var PlayModeViewModel = function(board) {
   ////////////////////////////////////////////////
   // managing game state. new/save/restore a game.
   ////////////////////////////////////////////////
-  self.saveGame = function() {
+  this.saveGame = function() {
     self.oldGameState = self.board.getSnapshot();
     self.oldStatus = self.playing();
   };
@@ -752,7 +755,7 @@ var PlayModeViewModel = function(board) {
   /*
    * Restore game to a given state.
    */
-  self.restoreGame = function() {
+  this.restoreGame = function() {
     self.board.setBoardState(self.oldGameState);
     self.playing(self.oldStatus);
   };
@@ -760,7 +763,7 @@ var PlayModeViewModel = function(board) {
   /*
    * Reset game to start state.
    */
-  self.restartGame = function() {
+  this.restartGame = function() {
     self.board.reset();
     self.submitStatus();
   };
@@ -768,7 +771,7 @@ var PlayModeViewModel = function(board) {
   /*
    * Submit current status to hangout server
    */
-  self.submitStatus = function() {
+  this.submitStatus = function() {
     var snapshot = self.board.getSnapshot();
     snapshot.mode = 'Play';
     HANGOUTAPI.submitDelta(snapshot);
@@ -778,7 +781,7 @@ var PlayModeViewModel = function(board) {
    * Highlighting units (row, col, square or value) and showing
    * missing values
    */
-  self.highlightUnit = function(unit, notify) {
+  this.highlightUnit = function(unit, notify) {
     var missing = self.board.highlightUnit(unit);
     self.highlightMissing(missing);
 
@@ -787,14 +790,14 @@ var PlayModeViewModel = function(board) {
     }
   };
 
-  self.gestureDetector = new SelectionGesture();
+  this.gestureDetector = new SelectionGesture();
   /*
    * The parameter for the start function may have two different format:
    * 1. It has 'restore' property, so playmode will restore a saved puzzle
    * 2. It has 'gameString' property, so it represents the state of a puzzle,
    *    playmode will use the state to initialize itself.
    */
-  self.start = function(arg, notify) {
+  this.start = function(arg, notify) {
     if (arg.restore) {
       self.restoreGame();
     } else {
@@ -815,7 +818,7 @@ var PlayModeViewModel = function(board) {
   /*
    * Add UI event handlers for play mode.
    */
-  self.setupControls = function() {
+  this.setupControls = function() {
     /*
      * clicking on a cell will highlight all its peers
      */
@@ -896,7 +899,7 @@ var PlayModeViewModel = function(board) {
     });
   };
 
-  self.stop = function() {
+  this.stop = function() {
     if (self.playing()) {
       $('body').off('click');
       $('#game-pane').off();
@@ -916,11 +919,11 @@ var PlayModeViewModel = function(board) {
 var PuzzleListViewModel = function(board) {
   var self = this;
   self.name = 'List';
-  self.board = board;
-  self.puzzleID = ko.observable(1);
-  self.notify = true;
+  this.board = board;
+  this.puzzleID = ko.observable(1);
+  this.notify = true;
 
-  self.updateBoard = function(newValue) {
+  this.updateBoard = function(newValue) {
     self.board.setBoardState({gameString: self.puzzleList[newValue-1] || ''});
     if (self.notify) {
       window.HANGOUTAPI.submitDelta({mode: 'List', puzzleID: ''+self.puzzleID()});
@@ -929,7 +932,7 @@ var PuzzleListViewModel = function(board) {
 
   self.puzzleID.subscribe(self.updateBoard);
 
-  self.start = function(state, notify) {
+  this.start = function(state, notify) {
     var pid = state && state['puzzleID'];
     if (pid == undefined) {
       pid = self.puzzleID();
@@ -942,17 +945,17 @@ var PuzzleListViewModel = function(board) {
     }
   };
 
-  self.stop = function() {
+  this.stop = function() {
   };
 
-  self.addPuzzles = function(puzzles) {
+  this.addPuzzles = function(puzzles) {
     self.puzzleList.push.apply(puzzles);
   };
 
-  self.getGame = function() {
+  this.getGame = function() {
     return self.puzzleList[self.puzzleID()-1];
   };
-  self.puzzleList = ['003020600900305001001806400008102900700000008006708200002609500800203009005010300',
+  this.puzzleList = ['003020600900305001001806400008102900700000008006708200002609500800203009005010300',
                      '200080300060070084030500209000105408000000000402706000301007040720040060004010003',
                      '000000907000420180000705026100904000050000040000507009920108000034059000507000000',
                      '030050040008010500460000012070502080000603000040109030250000098001020600080060020',
@@ -1009,11 +1012,11 @@ var GameEditorViewModel = function(board) {
   var self = this;
   var emptyGame = ('.........\n.........\n.........\n.........\n.........\n' +
                    '.........\n.........\n.........\n.........');
-  self.board = board;
-  self.editedGameString = ko.observable('');
-  self.updateCells = true;
-  self.name = 'Edit';
-  self.editing = false;
+  this.board = board;
+  this.editedGameString = ko.observable('');
+  this.updateCells = true;
+  this.name = 'Edit';
+  this.editing = false;
 
   function normalizeGameString(gameString) {
     gameString = gameString.replace(/[^1-9\s]/g, '.');
@@ -1024,7 +1027,7 @@ var GameEditorViewModel = function(board) {
    * Fill the board with given gameString, the gameString may have
    * more or less than 81 valid values.
    */
-  self.setGame = function(gameString) {
+  this.setGame = function(gameString) {
     gameString = normalizeGameString(gameString);
     if (self.updateCells) {
       self.board.setBoardState({gameString: gameString});
@@ -1034,11 +1037,11 @@ var GameEditorViewModel = function(board) {
     }
   };
 
-  self.editedGameString.subscribe(self.setGame);
+  this.editedGameString.subscribe(self.setGame);
   /*
    * set up actions for interactive editing of the game.
    */
-  self.start = function(arg, notify) {
+  this.start = function(arg, notify) {
     self.notify = notify;
     self.editedGameString(arg.gameString || emptyGame);
     if (self.editing) return;  // already in edit mode, don't need to setup the controls
@@ -1072,7 +1075,7 @@ var GameEditorViewModel = function(board) {
   /*
    * remove registered event listeners.
    */
-  self.stop = function() {
+  this.stop = function() {
     $('#game-pane').off();
     self.editedGameString('');
     self.editing = false;
@@ -1081,7 +1084,7 @@ var GameEditorViewModel = function(board) {
   /*
    * get the edited game string
    */
-  self.getGame = function() {
+  this.getGame = function() {
     return normalizeGameString(self.editedGameString());
   };
 };
@@ -1092,42 +1095,39 @@ var GameEditorViewModel = function(board) {
 var SudokuGameViewModel = function() {
   var self = this;
   // components of the game state
-  self.board = new BoardViewModel(9, 9);
-  self.playMode = new PlayModeViewModel(self.board);
-  self.gameEditor = new GameEditorViewModel(self.board);
-  self.puzzleChooser = new PuzzleListViewModel(self.board);
-  self.users = new UserList();
+  this.board = new BoardViewModel(9, 9);
+  this.playMode = new PlayModeViewModel(this.board);
+  this.gameEditor = new GameEditorViewModel(this.board);
+  this.puzzleChooser = new PuzzleListViewModel(this.board);
+  this.users = new UserList();
 
-  self.mode = ko.observable(self.playMode);
-  self.modes = {
+  this.mode = ko.observable(self.playMode);
+  this.modes = {
     'Play': self.playMode,
     'List': self.puzzleChooser,
     'Edit': self.gameEditor
   };
 
-  self.strings = ko.observable(strings['en']);
-  self.strings.subscribe(function(newValue) {
-    console.log(newValue);
-  });
+  this.strings = ko.observable(strings['en']);
 
   /*
    * Switch to given mode: first stop current mode, then start the new
    * mode.
    */
-  self.switchToMode = function(mode, args, notify) {
+  this.switchToMode = function(mode, args, notify) {
     self.mode().stop();
     self.mode(mode);
     mode.start(args, notify);
   };
 
-  self.switchToModeByName = function(modename, args, notify) {
+  this.switchToModeByName = function(modename, args, notify) {
     self.switchToMode(self.modes[modename], args, notify);
   };
 
   /*
    * Stop choosing/editing new puzzle, go back to old puzzle.
    */
-  self.cancelEdit = function() {
+  this.cancelEdit = function() {
     self.switchToMode(self.playMode, {restore: true}, true);
   };
 
@@ -1135,7 +1135,7 @@ var SudokuGameViewModel = function() {
    * Get the new gameString from game selecting mode, then initialize
    * the game.
    */
-  self.startNewGame = function() {
+  this.startNewGame = function() {
     var newGameString = self.mode().getGame();
     self.switchToMode(self.playMode, {gameString: newGameString}, true);
   };
@@ -1143,7 +1143,7 @@ var SudokuGameViewModel = function() {
   /*
    * The methods of choosing new puzzle
    */
-  self.getNewGame = function(method, notify) {
+  this.getNewGame = function(method, notify) {
     self.playMode.saveGame();
     self.switchToMode(method, {}, true);
   };
@@ -1158,11 +1158,11 @@ var SudokuGameViewModel = function() {
   /*
    * set the game board, according to the shared state
    */
-  self.catchUp = function(state) {
+  this.catchUp = function(state) {
     self.switchToMode(self.modes[state.mode], state, false);
   };
 
-  self.newGameMethods = [self.gameEditor, self.puzzleChooser];
+  this.newGameMethods = [self.gameEditor, self.puzzleChooser];
 
   $('#new-game-menu').on('click', 'li.new-game', function(e) {
     e.stopPropagation();
@@ -1227,19 +1227,19 @@ var SelectionGesture = function() {
     }
   };
 
-  self.startGesture = function startGesture(cell) {
+  this.startGesture = function startGesture(cell) {
     self.dragging = true;
     self.cellsOnPath.splice(0, self.cellsOnPath.length, cell);
   };
 
-  self.addCell = function addCell(cell) {
+  this.addCell = function addCell(cell) {
     // add an element to the array unless the element is already in it
     if (self.dragging && self.cellsOnPath.indexOf(cell) == -1) {
       self.cellsOnPath.push(cell);
     }
   };
 
-  self.endGesture = function endGesture() {
+  this.endGesture = function endGesture() {
     if (!self.dragging) return null;
     self.dragging = false;
     return shapeDetect(self.cellsOnPath);
