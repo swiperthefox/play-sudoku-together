@@ -41,8 +41,8 @@
  * Empty implementations of the google+ hangout data API
  */
 window.HANGOUTAPI = {
-  clearValue: function(key){},
-  setValue: function(key, value) {},
+  clearValue: function (key) {},
+  setValue: function (key, value) {},
   submitDelta: function(opt_updates, opt_removes) {},
   sendMessage: function(message) {}
 };
@@ -87,13 +87,14 @@ var strings = {
  *
  * mode: (mode.start) The mode of the app (play, edit or list)
  *
- * c0#0, c0#1, ..., c8#8: (Cell.removeOrAddValue) The value list of each cell.
+ * c0#0, c0#1, ..., c8#8: (Cell.removeOrAddValue) The state of each cell, it's
+ *     json object {value: [...], owner: ''}.
  *
  * gameString: (BoardViewModel.setBoardState)the game string of the board.
  *
  * puzzleID: (PuzzleListViewModel.updateBoard) the id of current selected puzzle,
  *
- * owner: (SudokuGameViewModel.switchToMode) Operations to
+ * A note about owner: (SudokuGameViewModel.switchToMode) Operations to
  * create/choose new game can only performed by one player (called
  * owner) and others can only discuss with the owner. The first user
  * started such actions is the owner, and the owner is set to '' when
@@ -124,12 +125,16 @@ var UserList = function() {
   this.userList = ko.observableArray();
   this.userMap = Object.create(null);
   this.localUser = ko.observable('');
+  this.colorMap = Object.create(null);
 
   this.addUser = function(id, name) {
     if (!self.userMap[id]) {
       var newUser = new User(id, name, false);
       self.userList.push(newUser);
       self.userMap[id] = newUser;
+      if (!self.colorMap[id]) {
+        self.colorMap[id] = palette.randomColor();
+      };
     }
   };
 
@@ -142,6 +147,7 @@ var UserList = function() {
 
   this.removeUser = function(id) {
     delete self.userMap[id];
+    delete self.colorMap[id];
     var users = self.userList();
     for (var i=0; i<users.length; ++i) {
       var user = users[i];
@@ -165,6 +171,10 @@ var UserList = function() {
   this.enabled = function(uid) {
     return self.userMap[uid].follow();
   };
+
+  this.getBackground = function(uid) {
+   return self.colorMap[uid];
+  };
 };
 
 /*
@@ -182,7 +192,7 @@ var palette = {
 /*
  * Dimmed version of above colors
  */
-palette.dimmedColors = (function(mask) {
+palette.dimmedColors = (function maskWithColor(mask) {
   function hexToRGB(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -210,6 +220,15 @@ palette.dimmedColors = (function(mask) {
     };
 })('#dddddd');
 
+palette.randomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
 /*
  * Represents the information in one cell.
  */
@@ -222,7 +241,8 @@ var CellState = function(i, j) {
   this.values = ko.observableArray();
 
   // who has the right to change it
-  this.owner = "";
+  this.owner = ko.observable(undefined);
+  this.localUser = undefined;
 
   // bookkeeping variables for highlighting, correctness check
   this.isGiven = ko.observable(false);         // whether this cell is given at the start
@@ -231,13 +251,13 @@ var CellState = function(i, j) {
   this.isFocused = ko.observable(false);       // is it the cell that accepting input
   this.valueHighlight = ko.observable(false);
   this.pointerHighlight = ko.observable(false);
-  this.isNotMarker = ko.computed(function() {
+  this.isNotMarker = ko.computed(function isNotMarker() {
     return self.values().length == 1;
   }, this);
   this.key = 'C' + i + '#' + j;       // used to encode the game state
 
   // colors used for the background of different kind of cells
-  this.colors = ko.computed(function() {
+  this.colors = ko.computed(function getColorSet() {
     return self.isGiven() ? palette.dimmedColors : palette.normalColor;
   }, this);
 
@@ -249,7 +269,7 @@ var CellState = function(i, j) {
    * 4. focused cell: input will go into this cell
    * 5. pointer: mouse is pointing to this cell
    */
-  this.background = ko.computed(function() {
+  this.background = ko.computed(function background() {
     var colors = self.colors();
     return ((self.pointerHighlight() && colors['pointer']) ||
             (self.isFocused()        && colors['focused']) ||
@@ -263,14 +283,18 @@ var CellState = function(i, j) {
    * 2. highlighted value
    * 3. conflict: red
    */
-  this.color = ko.computed(function() {
+  this.color = ko.computed(function color() {
     return ((self.conflictCount() > 0 && '#ff0000') ||
             (self.valueHighlight()    && '#0000ff') ||
             (true                     && '#000000'));
   }, this);
 
+  this.showOwnerFlag = ko.computed(function showOwnerFlag() {
+    return self.localUser && self.allowToChange();
+  }, this);
+
   // border classes to draw wider borders for square units
-  this.borderClass = (function() {
+  this.borderClass = (function boardClass() {
     var leftBorder = (j%3 == 0);
     var rightBorder = (j+1)%3==0;
     var topBorder = (i%3 == 0);
@@ -288,10 +312,9 @@ var CellState = function(i, j) {
    * stringValue: combine the values into a single string,
    * to be shown in the cell.
    */
-  this.stringValue = ko.computed(function() {
+  this.stringValue = ko.computed(function toString() {
     return self.values().join(' ');
   });
-
 
   this.setValue = function(values) {
     self.values.removeAll();
@@ -302,22 +325,27 @@ var CellState = function(i, j) {
    *
    * values is an array of values, and isGiven is a bool.
    */
-  this.setState = function(values, isGiven) {
+  this.setState = function(values, isGiven, owner) {
     self.setValue(values);
     self.isGiven(isGiven);
     self.conflictCount(0);
     self.peerHighlight(false);
     self.isFocused(false);
     self.valueHighlight(false);
+    self.owner(owner);
   };
 
-  this.init = function(initValue, currentValues) {
+  this.init = function(initValue, currentState) {
     var isGiven = initValue != undefined && initValue >= '1' && initValue <= '9';
     var givenValue = isGiven?[initValue]:[];
-    currentValues = currentValues || givenValue;
-    self.setState(currentValues, isGiven);
+    var currentValues = (currentState && currentState.value) || givenValue;
+    var owner = (currentState && currentState.owner) || undefined;
+    self.setState(currentValues, isGiven, owner);
   };
 
+  this.allowToChange = function() {
+    return (self.owner() == undefined || self.owner() == self.localUser);
+  };
   /*
    * Get the first value from the value list.
    */
@@ -342,7 +370,11 @@ var CellState = function(i, j) {
    * for conflicts.
    */
   this.removeOrAddValue = function(v) {
+    // if the cell is given, do not change
     if (self.isGiven()) return null;
+    // if the cell has owner and the cell's owner is not localUser, do not change
+    if (!self.allowToChange()) return null;
+
     var result = null;
     if (v == '0') {
       result = self.updateValue([]);
@@ -357,13 +389,13 @@ var CellState = function(i, j) {
       } else {
         values.splice(idx, 0, v);
       }
-      result = self.updateValue(values);
+      result = self.updateValue(values, self.localUser);
     }
-    HANGOUTAPI.setValue(self.key, self.values());
+    HANGOUTAPI.setValue(self.key, {value: self.values(), owner: self.localUser});
     return result;
   };
 
-  this.updateValue = function(values) {
+  this.updateValue = function(values, owner) {
     var conflictPotential = {};
     if (values.length == 1) {
       conflictPotential['new'] = values[0];
@@ -372,6 +404,7 @@ var CellState = function(i, j) {
       conflictPotential['old'] = self.getValue();
     }
     self.setValue(values);
+    self.owner(owner);
     return conflictPotential;
   };
 };
@@ -421,6 +454,11 @@ var BoardViewModel = function(row, col) {
     }
   };
 
+  this.setLocalUser = function(localUser) {
+    self.forAllCells(function(i, j, cell) {
+      cell.localUser = localUser;
+    });
+  };
   /*
    * set game board state, given a string representation of a sudoku
    * game, optionally with an object whose keys in the form like
@@ -479,8 +517,8 @@ var BoardViewModel = function(row, col) {
   /*
    * Set the value of given cell
    */
-  this.updateCell = function(i, j, values) {
-    var conflictPotential = self.cells[i][j].updateValue(values);
+  this.updateCell = function(i, j, values, lastWriter) {
+    var conflictPotential = self.cells[i][j].updateValue(values, lastWriter);
     self.afterChangeCell(i, j, conflictPotential);
   };
   /*
@@ -672,7 +710,11 @@ this.focusedCell = null;
   this.getSnapshot = function() {
     var result = {gameString: self.initGameString};
     self.forAllCells(function(i, j, cell) {
-      result[cell.key] = JSON.stringify(cell.values().slice(0));
+      var state = {
+        value: cell.values(),
+        owner: cell.owner()
+      };
+      result[cell.key] = JSON.stringify(state);
     });
     return result;
   };
@@ -1164,6 +1206,10 @@ var SudokuGameViewModel = function() {
 
   this.newGameMethods = [self.gameEditor, self.puzzleChooser];
 
+  this.getBackground = function(userId) {
+    return self.users.getBackground(userId);
+  };
+
   $('#new-game-menu').on('click', 'li.new-game', function(e) {
     e.stopPropagation();
     var data = ko.dataFor(this);
@@ -1273,6 +1319,7 @@ if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
     // get current user list and current state
     sudoku.users.localUser(hangout.getLocalParticipantId());
     sudoku.users.addUsers(hangout.getParticipants());
+    sudoku.board.setLocalUser(hangout.getLocalParticipantId());
 
     var state = hangout.data.getState();
     if (state.mode) {
@@ -1323,23 +1370,23 @@ if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
     hangout.data.onStateChanged.add(function(event) {
       var changedKeys = event.addedKeys;
       var mode = event.state['mode'];
-      var lastWriter;
+      var owner;
       var localUser = sudoku.users.localUser();
 
       switch (mode) {
       case 'List':
         // current mode is 'List', we only need to update the puzzleID
         var pid = event.state['puzzleID'];
-        lastWriter = event.metadata['puzzleID'].lastWriter;
-        if (lastWriter != localUser) {
+        owner = event.metadata['puzzleID'].lastWriter;
+        if (owner != localUser) {
           sudoku.switchToModeByName('List', {puzzleID: pid}, true);
         }
         break;
       case 'Edit':
         // current mode is 'Edit', just update the editedGameString
         var editorGameString = event.state['editorGameString'];
-        lastWriter = event.metadata['editorGameString'].lastWriter;
-        if (lastWriter != localUser) {
+        owner = event.metadata['editorGameString'].lastWriter;
+        if (owner != localUser) {
           sudoku.switchToModeByName('Edit', {gameString: editorGameString}, false);
         }
         break;
@@ -1355,11 +1402,11 @@ if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
         for (var i=0; i<changedKeys.length; ++i) {
           if (changedKeys[i].key == 'mode') {
             modeChange = true;
-            lastWriter = changedKeys[i].lastWriter;
+            owner = changedKeys[i].lastWriter;
             break;
           }
         }
-        if (modeChange && lastWriter != localUser) {
+        if (modeChange && owner != localUser) {
           // we can pass the event.state directly to PlayModeViewModel's
           // start method
           sudoku.switchToModeByName('Play', event.state, false);
@@ -1367,15 +1414,16 @@ if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
           // update the cells mentioned in changedKeys
           for (i=0; i<changedKeys.length; i++) {
             var cellName = changedKeys[i].key;
-            lastWriter = changedKeys[i].lastWriter;
-            if (lastWriter == localUser) continue;
+            var cellState = changedKeys[i].value;
+            owner = cellState.owner;
             if (cellName[0] != 'C') {
               continue;
             }
             var row = parseInt(cellName[1]);
             var col = parseInt(cellName[3]);
-            var cellValues = JSON.parse(changedKeys[i].value);
-            sudoku.board.updateCell(row, col, cellValues);
+            var cellValues = JSON.parse(cellState.value);
+//            if (lastWriter == localUser) continue;
+            sudoku.board.updateCell(row, col, cellValues, owner);
           }
         }
       }

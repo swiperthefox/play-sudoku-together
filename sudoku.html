@@ -64,6 +64,9 @@
                              css: {centered: isNotMarker},
                              style: {background: background, color: color}"
                              ></span>
+            <div class="owner-flag" data-bind="style: {background: $root.getBackground(owner())},
+                                               visible: showOwnerFlag"></div>
+              
           </td>
           <!-- /ko -->
           <td class="side-cell">

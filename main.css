@@ -124,6 +124,13 @@ td:active {
     outline: none;
 }
 
+.owner-flag {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 5px;
+    height: 5px;
+}
 /* in controls */
 #controls div {
     width: 100%;
