@@ -173,7 +173,7 @@ var UserList = function() {
   };
 
   this.getBackground = function(uid) {
-   return self.colorMap[uid];
+    return self.colorMap[uid];
   };
 };
 
@@ -217,17 +217,17 @@ palette.dimmedColors = (function maskWithColor(mask) {
     'focused': maskedColor(nc['focused'], mask),
     'peerHLD': maskedColor(nc['peerHLD'], mask),
     'white': maskedColor(nc['white'], mask)
-    };
+  };
 })('#dddddd');
 
 palette.randomColor = function() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+  var letters = '0123456789ABCDEF'.split('');
+  var color = '#';
+  for (var i = 0; i < 6; i++ ) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
 
 /*
  * Represents the information in one cell.
@@ -343,6 +343,12 @@ var CellState = function(i, j) {
     self.setState(currentValues, isGiven, owner);
   };
 
+  this.getState = function() {
+    var state = Object.create(null);
+    state.value = self.values();
+    state.owner = self.owner();
+    return state;
+  };
   this.allowToChange = function() {
     return (self.owner() == undefined || self.owner() == self.localUser);
   };
@@ -620,7 +626,7 @@ var BoardViewModel = function(row, col) {
       return Math.floor(j/3)==col && Math.floor(i/3)==row;
     }, false);
   };
-this.focusedCell = null;
+  this.focusedCell = null;
   this.selectCell = function(row, col) {
     var missing = self.highlightCells(function(i, j) {
       return self.isPeer(i, j, row, col);
@@ -710,10 +716,7 @@ this.focusedCell = null;
   this.getSnapshot = function() {
     var result = {gameString: self.initGameString};
     self.forAllCells(function(i, j, cell) {
-      var state = {
-        value: cell.values(),
-        owner: cell.owner()
-      };
+      var state = cell.getState();
       result[cell.key] = JSON.stringify(state);
     });
     return result;
@@ -1201,6 +1204,7 @@ var SudokuGameViewModel = function() {
    * set the game board, according to the shared state
    */
   this.catchUp = function(state) {
+    console.log("Switching to mode:", state.mode);
     self.switchToMode(self.modes[state.mode], state, false);
   };
 
@@ -1422,7 +1426,7 @@ if (window.gapi && gapi.hangout && gapi.hangout.onApiReady) {
             var row = parseInt(cellName[1]);
             var col = parseInt(cellName[3]);
             var cellValues = JSON.parse(cellState.value);
-//            if (lastWriter == localUser) continue;
+            //            if (lastWriter == localUser) continue;
             sudoku.board.updateCell(row, col, cellValues, owner);
           }
         }
